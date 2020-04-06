@@ -6,26 +6,26 @@ public class Chunk : MonoBehaviour {
 	Dictionary<int, BlockLibrary.SurfaceData> surfaces;
 	Mesh mesh;
 
-	public void Init(int x, int y, ref WorldData worldData, ref BlockLibrary blockLibrary) {
+	public void Init(int x, int y, WorldData worldData, BlockLibrary blockLibrary) {
 		this.x = x;
 		this.y = y;
 		surfaces = new Dictionary<int, BlockLibrary.SurfaceData>();
 
+		Debug.Log("Init " + x + ", " + y);
 		worldData.tryInit(x, y);
 		blockLibrary.Init();
 		
-
-		//transform.position = new Vector3(x, 0f, y) * CHUNK_SIZE;
+		transform.position = new Vector3(x, 0f, y) * WorldData.CHUNK_SIZE;
 		
 		mesh = new Mesh();
 		GetComponent<MeshFilter>().mesh = mesh;
 
-		GenerateMesh(ref worldData, ref blockLibrary);
+		GenerateMesh(worldData, blockLibrary);
 
 		UpdateMesh();
 	}
 
-	void GenerateMesh(ref WorldData worldData, ref BlockLibrary blockLibrary) {
+	void GenerateMesh(WorldData worldData, BlockLibrary blockLibrary) {
 		//Clear mesh
 		//Clear collider
 

@@ -83,10 +83,7 @@ public class BlockLibrary : ScriptableObject {
 		types.Add(new TypeData("Wool", 7));					//7
 	}
 
-	public TypeData GetBlockType(int typeId) {
-		Debug.Log(typeId);
-		return types[typeId - 1];
-	}
+	public TypeData GetBlockType(int typeId) => types[typeId - 1];
 
 	void AddSurface(Vector3 bottomLeft, Vector3 topLeft, Vector3 topRight, Vector3 bottomRight, int w, int h, Direction side, SurfaceData surface) {
 		Vector3 normal;

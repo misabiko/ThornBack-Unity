@@ -21,6 +21,7 @@
         <e p="Scripts" t="Include">
           <e p="BlockLibrary.cs" t="Include" />
           <e p="Chunk.cs" t="Include" />
+          <e p="ChunkLoader.cs" t="Include" />
           <e p="WorldData.cs" t="Include" />
         </e>
       </e>

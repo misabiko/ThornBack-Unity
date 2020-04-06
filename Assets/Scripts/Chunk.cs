@@ -2,16 +2,11 @@
 using UnityEngine;
 
 public class Chunk : MonoBehaviour {
-	public WorldData worldData;
-	public BlockLibrary blockLibrary;
-
 	int x, y;
 	Dictionary<int, BlockLibrary.SurfaceData> surfaces;
 	Mesh mesh;
 
-	void Start() => Init(0, 0, ref worldData, ref blockLibrary);
-
-	void Init(int x, int y, ref WorldData worldData, ref BlockLibrary blockLibrary) {
+	public void Init(int x, int y, ref WorldData worldData, ref BlockLibrary blockLibrary) {
 		this.x = x;
 		this.y = y;
 		surfaces = new Dictionary<int, BlockLibrary.SurfaceData>();
@@ -35,6 +30,7 @@ public class Chunk : MonoBehaviour {
 		//Clear collider
 
 		blockLibrary.AddBoxSurfaces(Vector3.zero, Vector3.one, blockLibrary.GetBlockType(worldData.getBlock(x, y, 0, 0, 0).type), ref surfaces);
+		blockLibrary.AddBoxSurfaces(Vector3.forward * 2, Vector3.one, blockLibrary.GetBlockType(worldData.getBlock(x, y, 0, 0, 0).type), ref surfaces);
 	}
 
 	void UpdateMesh() {

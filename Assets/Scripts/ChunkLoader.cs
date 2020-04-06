@@ -28,11 +28,9 @@ public class ChunkLoader : MonoBehaviour {
         Chunk chunk = chunkGameObject.GetComponent<Chunk>();
         chunk.Init(x, y, worldData, blockLibrary);
         
-        chunkGameObject.name = GetChunkKey(x, y);
+        chunkGameObject.name = WorldData.GetChunkKey(x, y);
         chunks.Add(chunkGameObject.name, chunk);
     }
-
-    static string GetChunkKey(int x, int y) => x + "," + y;
 
     void UpdateLoadingChunks(int chunkX, int chunkY) {
         var loadingBacklogList = new List<Tuple<int, int>>();
@@ -41,7 +39,7 @@ public class ChunkLoader : MonoBehaviour {
             for (int y = chunkY - radius; y < chunkY + radius; y++) {
                 if (
                     Mathf.Pow(x - chunkX, 2) + Mathf.Pow(y - chunkY, 2) <= radius * radius &&
-                    !chunks.ContainsKey(GetChunkKey(x, y))
+                    !chunks.ContainsKey(WorldData.GetChunkKey(x, y))
                 )
                     loadingBacklogList.Add(Tuple.Create(x, y));
             }
@@ -67,7 +65,7 @@ public class ChunkLoader : MonoBehaviour {
         while (HasBacklog()) {
             Tuple<int, int> coords = loadingBacklog.Dequeue();
             
-            Debug.Log("Loading " + GetChunkKey(coords.Item1, coords.Item2));
+            Debug.Log("Loading " + WorldData.GetChunkKey(coords.Item1, coords.Item2));
             CreateNewChunk(coords.Item1, coords.Item2);
         }
     }

@@ -105,6 +105,7 @@ public class BlockLibrary : ScriptableObject {
 					material.SetTexture("_BaseMap", textures[i]);
 					break;
 			}
+
 			materials.Add(material);
 		}
 

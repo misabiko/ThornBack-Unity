@@ -25,6 +25,7 @@
           <e p="Player.cs" t="Include" />
           <e p="PlayerData.cs" t="Include" />
           <e p="PlayerMovement.cs" t="Include" />
+          <e p="StayAABB.cs" t="Include" />
           <e p="WorldData.cs" t="Include" />
         </e>
       </e>

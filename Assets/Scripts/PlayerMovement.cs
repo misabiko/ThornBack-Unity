@@ -21,16 +21,10 @@ public class PlayerMovement : MonoBehaviour {
 	void Update() => moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
 
 	void FixedUpdate() {
-		Vector3 force = moveDirection * data.accel;
-		
-		float maxSpeed;
-		maxSpeed = sprinting ? data.sprintSpeed : data.speed;
-
-		rigidbody.AddForce(force);
-		ClampVelocityXZ(maxSpeed);
+		rigidbody.AddForce(moveDirection * data.accel);
+		ClampVelocityXZ(sprinting ? data.sprintSpeed : data.speed);
 	}
 	
-	// ReSharper disable once InconsistentNaming
 	void ClampVelocityXZ(float maxSpeed) {
 		Vector3 flatVel = rigidbody.velocity;
 		flatVel.y = 0;

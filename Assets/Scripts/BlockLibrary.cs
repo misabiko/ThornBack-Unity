@@ -21,19 +21,26 @@ public class BlockLibrary : ScriptableObject {
 
 		public SurfaceData() => Clear();
 
-		void Clear() {
+		public void Clear() {
 			vertices = new List<Vector3>();
 			normals = new List<Vector3>();
 			UVs = new List<Vector2>();
 			indices = new List<int>();
 		}
 
-		void Add(SurfaceData surface) {
-			//int vertexCount = 
+		public void Add(SurfaceData surface) {
+			int vertexCount = vertices.Count;
+			
+			vertices.AddRange(surface.vertices);
+			normals.AddRange(surface.normals);
+			UVs.AddRange(surface.UVs);
+
+			for (int i = 0; i < surface.indices.Count; i++)
+				indices.Add(vertexCount + surface.indices[i]);
 		}
 	}
 
-	public struct TypeData {
+	public class TypeData {
 		public string name;
 
 		public int[] materials;
@@ -85,49 +92,51 @@ public class BlockLibrary : ScriptableObject {
 
 	public TypeData GetBlockType(int typeId) => types[typeId - 1];
 
+	public int GetTypeCount() => types.Count;
+
 	void AddSurface(Vector3 bottomLeft, Vector3 topLeft, Vector3 topRight, Vector3 bottomRight, int w, int h, Direction side, SurfaceData surface) {
 		Vector3 normal;
 		switch (side) {
 			case Direction.NORTH:
-				normal = new Vector3(0, 0, -1);
+				normal = Vector3.back;
 				break;
 			case Direction.SOUTH:
-				normal = new Vector3(0, 0, 1);
+				normal = Vector3.forward;
 				break;
 			case Direction.EAST:
-				normal = new Vector3(1, 0, 0);
+				normal = Vector3.right;
 				break;
 			case Direction.WEST:
-				normal = new Vector3(-1, 0, 0);
+				normal = Vector3.left;
 				break;
 			case Direction.TOP:
-				normal = new Vector3(0, 1, 0);
+				normal = Vector3.up;
 				break;
 			case Direction.BOTTOM:
-				normal = new Vector3(0, -1, 0);
+				normal = Vector3.down;
 				break;
 			default:
 				throw new Exception("You gave a non existant direction.");
 		}
 
-		/* if (wireframe) {
-			std::array<int, 14> newIndices;
-			if (side % 2)
-				newIndices = {2,3,1,2, 1,0,2,1};
+		 //if (wireframe) {
+			/*int[] newIndices = new int[14];
+			if (((int)side) % 2 == 0)
+				newIndices = new int[] {2,3,1,2, 1,0,2,1};
 			else
-				newIndices = {2,0,1,2, 1,3,2,1};
+				newIndices = new int[] {2,0,1,2, 1,3,2,1};
 	
-			for (const unsigned& i : newIndices)
-				surface->second.indices.push_back(surface->second.vertices.size() + i);
-		}else { */
-		int[] newIndices;
-		if (((int) side) % 2 == 0)
-			newIndices = new[] {2, 3, 1, 1, 0, 2};
-		else
-			newIndices = new[] {2, 0, 1, 1, 3, 2};
+			foreach (int newIndex in newIndices)
+				surface.indices.Add(surface.vertices.Count + newIndex);*/
+		//}else { 
+			int[] newIndices;
+			if (((int) side) % 2 == 0)
+				newIndices = new[] {2, 3, 1, 1, 0, 2};
+			else
+				newIndices = new[] {2, 0, 1, 1, 3, 2};
 
-		foreach (int newIndex in newIndices)
-			surface.indices.Add(surface.vertices.Count + newIndex);
+			foreach (int newIndex in newIndices)
+				surface.indices.Add(surface.vertices.Count + newIndex);
 		//}
 
 		for (int i = 0; i < 4; i++)

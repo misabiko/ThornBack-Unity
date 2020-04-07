@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class ChunkLoader : MonoBehaviour {
@@ -14,10 +13,22 @@ public class ChunkLoader : MonoBehaviour {
     Queue<Tuple<int, int>> loadingBacklog;
 
     void Start() {
-        //worldData.load();
-        
         chunks = new Dictionary<string, Chunk>();
         loadingBacklog = new Queue<Tuple<int, int>>();
+        
+        //worldData.load();
+
+        float backlogSize = preloadRadius * preloadRadius * 4f;
+        float numLoaded = 0;
+        
+        for (int x = -preloadRadius; x < preloadRadius; x++) {
+            for (int y = -preloadRadius; y < preloadRadius; y++)	{
+                CreateNewChunk(x, y);
+                numLoaded++;
+            }
+
+            Debug.Log((numLoaded / backlogSize) * 100 + "%");
+        }
         
         UpdateLoadingChunks(0, 0);
     }

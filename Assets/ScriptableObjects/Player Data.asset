@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db33312ffe540c19d521d67a814c666, type: 3}
   m_Name: Player Data
   m_EditorClassIdentifier: 
-  speed: 1
-  sprintSpeed: 2
+  speed: 2
+  sprintSpeed: 4
   accel: 100
   jumpForce: 3
+  deccel: 20
   camSensitivityX: 0.25
   camSensitivityY: 0.25
+  tweakSensitivity: 0.004

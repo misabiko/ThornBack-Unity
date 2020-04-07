@@ -21,8 +21,17 @@ public class PlayerMovement : MonoBehaviour {
 	void Update() => moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
 
 	void FixedUpdate() {
-		rigidbody.AddForce(moveDirection * data.accel);
-		ClampVelocityXZ(sprinting ? data.sprintSpeed : data.speed);
+		if (moveDirection == Vector3.zero) {
+			var vel = Flatten(rigidbody.velocity);
+
+			if (vel.magnitude > 0.2f)
+				rigidbody.AddForce(-vel.normalized * data.deccel);
+			else
+				ClampVelocityXZ(0f);
+		}else {
+			rigidbody.AddForce(moveDirection * data.accel);
+			ClampVelocityXZ(sprinting ? data.sprintSpeed : data.speed);
+		}
 	}
 	
 	void ClampVelocityXZ(float maxSpeed) {
@@ -33,6 +42,11 @@ public class PlayerMovement : MonoBehaviour {
 			flatVel = flatVel.normalized * maxSpeed;
 		flatVel.y = rigidbody.velocity.y;
 		rigidbody.velocity = flatVel;
+	}
+
+	static Vector3 Flatten(Vector3 vector) {
+		vector.y = 0f;
+		return vector;
 	}
 	
 	public void OnMove(InputAction.CallbackContext ctx) {
@@ -60,4 +74,6 @@ public class PlayerMovement : MonoBehaviour {
 		transform.Rotate(Vector3.up, lookInput.x * data.camSensitivityX);
 		camTransform.Rotate(Vector3.right, -lookInput.y * data.camSensitivityY);
 	}
+
+	public void OnTweak(InputAction.CallbackContext ctx) {}
 }

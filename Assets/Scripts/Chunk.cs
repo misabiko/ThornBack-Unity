@@ -13,7 +13,6 @@ public class Chunk : MonoBehaviour {
 		surfaces = new Dictionary<int, BlockLibrary.SurfaceData>();
 
 		worldData.TryInit(x, y);
-		blockLibrary.Init();
 		
 		transform.position = new Vector3(x, 0f, y) * WorldData.CHUNK_SIZE;
 		
@@ -23,6 +22,8 @@ public class Chunk : MonoBehaviour {
 		GenerateMesh(worldData, blockLibrary);
 
 		UpdateMesh(blockLibrary);
+
+		GetComponent<Renderer>().materials = blockLibrary.materials.ToArray();
 	}
 
 	void GenerateMesh(WorldData worldData, BlockLibrary blockLibrary) {

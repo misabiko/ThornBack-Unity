@@ -15,7 +15,8 @@ public class ChunkLoader : MonoBehaviour {
     void Start() {
         chunks = new Dictionary<string, Chunk>();
         loadingBacklog = new Queue<Tuple<int, int>>();
-        
+
+        blockLibrary.Init();
         //worldData.load();
 
         float backlogSize = preloadRadius * preloadRadius * 4f;

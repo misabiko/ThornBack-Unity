@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu]
@@ -30,7 +31,7 @@ public class BlockLibrary : ScriptableObject {
 
 		public void Add(SurfaceData surface) {
 			int vertexCount = vertices.Count;
-			
+
 			vertices.AddRange(surface.vertices);
 			normals.AddRange(surface.normals);
 			UVs.AddRange(surface.UVs);
@@ -40,6 +41,7 @@ public class BlockLibrary : ScriptableObject {
 		}
 	}
 
+	[Serializable]
 	public class TypeData {
 		public string name;
 
@@ -73,21 +75,52 @@ public class BlockLibrary : ScriptableObject {
 		}
 	}
 
-	List<TypeData> types = new List<TypeData>();
+	public List<Texture> textures = new List<Texture>();
+	public Material opaqueMaterial;
+	public Material layeredMaterial;
+	public Texture grassOverlay;
+
+	public List<TypeData> types;
+	[HideInInspector] public List<Material> materials;
 
 	public void Init() {
-		types.Add(new TypeData("Dirt", 0));					//1
-		types.Add(new TypeData("Stone", 1));					//2
-		types.Add(new TypeData("Cobblestone", 2));			//3
+		types = new List<TypeData>();
+		materials = new List<Material>();
+		for (int i = 0; i < textures.Count; ++i) {
+			Material material;
+			switch (i) {
+				case 3:
+					material = new Material(opaqueMaterial);
+					material.SetTexture("_BaseMap", textures[i]);
+					material.SetColor("_BaseColor", new Color(0f, 0.52f, 0.125f));
+					break;
+				case 4:
+					material = new Material(layeredMaterial);
+					material.SetTexture("_BaseTexture", textures[i]);
+					material.SetTexture("_OverlayedTexture", grassOverlay);
+					material.SetColor("_OverlayedColor", new Color(0f, 0.52f, 0.125f));
+					break;
+				default:
+					material = new Material(opaqueMaterial);
+					material.SetTexture("_BaseMap", textures[i]);
+					break;
+			}
+			materials.Add(material);
+		}
+
+		types.Add(new TypeData("Dirt", 0)); //1
+		types.Add(new TypeData("Stone", 1)); //2
+		types.Add(new TypeData("Cobblestone", 2)); //3
 		types.Add(new TypeData("Grass",
 			4, 4,
 			4, 4,
 			0, 3
-			));	//4
+		)); //4
+
 		//Color(0, 0.52, 0.125, 1)
-		types.Add(new TypeData("Sand", 5));					//5
-		types.Add(new TypeData("Gravel", 6));				//6
-		types.Add(new TypeData("Wool", 7));					//7
+		types.Add(new TypeData("Sand", 5)); //5
+		types.Add(new TypeData("Gravel", 6)); //6
+		types.Add(new TypeData("Wool", 7)); //7
 	}
 
 	public TypeData GetBlockType(int typeId) => types[typeId - 1];
@@ -119,34 +152,33 @@ public class BlockLibrary : ScriptableObject {
 				throw new Exception("You gave a non existant direction.");
 		}
 
-		 //if (wireframe) {
-			/*int[] newIndices = new int[14];
-			if (((int)side) % 2 == 0)
-				newIndices = new int[] {2,3,1,2, 1,0,2,1};
-			else
-				newIndices = new int[] {2,0,1,2, 1,3,2,1};
-	
-			foreach (int newIndex in newIndices)
-				surface.indices.Add(surface.vertices.Count + newIndex);*/
-		//}else { 
-			int[] newIndices;
-			if (((int) side) % 2 == 0)
-				newIndices = new[] {2, 3, 1, 1, 0, 2};
-			else
-				newIndices = new[] {2, 0, 1, 1, 3, 2};
+//if (wireframe) {
+/*int[] newIndices = new int[14];
+if (((int)side) % 2 == 0)
+	newIndices = new int[] {2,3,1,2, 1,0,2,1};
+else
+	newIndices = new int[] {2,0,1,2, 1,3,2,1};
 
-			foreach (int newIndex in newIndices)
-				surface.indices.Add(surface.vertices.Count + newIndex);
-		//}
+foreach (int newIndex in newIndices)
+	surface.indices.Add(surface.vertices.Count + newIndex);*/
+//}else { 
+		int[] newIndices;
+		if (((int) side) % 2 == 0)
+			newIndices = new[] {2, 3, 1, 1, 0, 2};
+		else
 
+			newIndices = new[] {
+				2, 0, 1, 1, 3, 2
+			};
+		foreach (int newIndex in newIndices)
+			surface.indices.Add(surface.vertices.Count + newIndex);
+//}
 		for (int i = 0; i < 4; i++)
 			surface.normals.Add(normal);
-
-		surface.UVs.Add(new Vector2(0, h));
-		surface.UVs.Add(new Vector2(w, h));
 		surface.UVs.Add(new Vector2(0, 0));
 		surface.UVs.Add(new Vector2(w, 0));
-
+		surface.UVs.Add(new Vector2(0, h));
+		surface.UVs.Add(new Vector2(w, h));
 		surface.vertices.Add(bottomLeft);
 		surface.vertices.Add(bottomRight);
 		surface.vertices.Add(topLeft);

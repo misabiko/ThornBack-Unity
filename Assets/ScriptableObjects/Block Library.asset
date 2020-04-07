@@ -12,3 +12,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 671ed10999994634b47b55b769240ee9, type: 3}
   m_Name: Block Library
   m_EditorClassIdentifier: 
+  textures:
+  - {fileID: 2800000, guid: ed2eabbf819259a4c8e7b5c0e9349ab2, type: 3}
+  - {fileID: 2800000, guid: 5ef4d836fb2b01841b574408733acea3, type: 3}
+  - {fileID: 2800000, guid: 4c15bb888804cfc47ada964795ba5361, type: 3}
+  - {fileID: 2800000, guid: 9728ff9ee29a0a34db3fd56028fe37ad, type: 3}
+  - {fileID: 2800000, guid: aa6c11752a1b8ec409db2e3411090e4b, type: 3}
+  - {fileID: 2800000, guid: 046d36664925b764fa4910b77a7dabbe, type: 3}
+  - {fileID: 2800000, guid: 920a60b8b7ee8894fb04158ea8bb3419, type: 3}
+  - {fileID: 2800000, guid: f93d2ee93a053e44f9efe6dd088d1a98, type: 3}
+  opaqueMaterial: {fileID: 2100000, guid: a5c413ba21a3767498cabb87ec630dd5, type: 2}
+  layeredMaterial: {fileID: 2100000, guid: 9f7ffce2e9f9ba14e9a50a2176a74386, type: 2}
+  grassOverlay: {fileID: 2800000, guid: cfe250bbb5dafa140ba7c544769ae26c, type: 3}
+  types:
+  - name: Dirt
+    materials: 000000000000000000000000000000000000000000000000
+    multiTextured: 0
+  - name: Stone
+    materials: 010000000100000001000000010000000100000001000000
+    multiTextured: 0
+  - name: Cobblestone
+    materials: 020000000200000002000000020000000200000002000000
+    multiTextured: 0
+  - name: Grass
+    materials: 040000000400000004000000040000000000000003000000
+    multiTextured: 1
+  - name: Sand
+    materials: 050000000500000005000000050000000500000005000000
+    multiTextured: 0
+  - name: Gravel
+    materials: 060000000600000006000000060000000600000006000000
+    multiTextured: 0
+  - name: Wool
+    materials: 070000000700000007000000070000000700000007000000
+    multiTextured: 0
+  materials:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

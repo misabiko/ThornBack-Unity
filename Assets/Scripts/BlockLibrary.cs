@@ -121,7 +121,7 @@ public class BlockLibrary : ScriptableObject {
 				surface->second.indices.push_back(surface->second.vertices.size() + i);
 		}else { */
 		int[] newIndices;
-		if (((int) side) % 2 == 1)
+		if (((int) side) % 2 == 0)
 			newIndices = new[] {2, 3, 1, 1, 0, 2};
 		else
 			newIndices = new[] {2, 0, 1, 1, 3, 2};

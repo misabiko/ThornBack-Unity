@@ -12,26 +12,29 @@ public class WorldData : ScriptableObject {
 		public int type;
 		public bool rendered;
 
-		void Set(int type, bool rendered) {
+		public void Set(int type, bool rendered) {
 			this.type = type;
 			this.rendered = rendered;
 		}
 
-		bool equals(BlockData other) => other.rendered == rendered && other.type == type;
+		bool Equals(BlockData other) => other.rendered == rendered && other.type == type;
 	}
 
 	public Dictionary<string, BlockData[]> chunks = new Dictionary<string, BlockData[]>();
 
 	public static string GetChunkKey(int x, int y) => x + "," + y;
 
-	public BlockData getBlock(int chunkX, int chunkY, int x, int y, int z)
+	public BlockData GetBlock(int chunkX, int chunkY, int x, int y, int z)
 		=> chunks[GetChunkKey(chunkX, chunkY)][x + CHUNK_SIZE * y + CHUNK_SIZE * WORLD_HEIGHT * z];
 
-	public void tryInit(int chunkX, int chunkY) {
+	public void TryInit(int chunkX, int chunkY) {
 		string coords = GetChunkKey(chunkX, chunkY);
 		if (chunks.ContainsKey(coords)) return;
 		
 		chunks.Add(coords, new BlockData[CHUNK_VOLUME]);
-		chunks[coords][0] = new BlockData() {type = 1, rendered = true};
+		for (int i = 0; i < CHUNK_VOLUME; i++)
+			chunks[coords][i] = new BlockData();
+
+		chunks[coords][0].Set(1, true);
 	}
 }

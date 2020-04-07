@@ -2,6 +2,7 @@
 using UnityEngine;
 
 public class Chunk : MonoBehaviour {
+	[HideInInspector]
 	public int x, y;
 	Dictionary<int, BlockLibrary.SurfaceData> surfaces;
 	Mesh mesh;
@@ -12,7 +13,7 @@ public class Chunk : MonoBehaviour {
 		surfaces = new Dictionary<int, BlockLibrary.SurfaceData>();
 
 		Debug.Log("Init " + x + ", " + y);
-		worldData.tryInit(x, y);
+		worldData.TryInit(x, y);
 		blockLibrary.Init();
 		
 		transform.position = new Vector3(x, 0f, y) * WorldData.CHUNK_SIZE;
@@ -29,7 +30,7 @@ public class Chunk : MonoBehaviour {
 		//Clear mesh
 		//Clear collider
 
-		blockLibrary.AddBoxSurfaces(Vector3.zero, Vector3.one, blockLibrary.GetBlockType(worldData.getBlock(x, y, 0, 0, 0).type), ref surfaces);
+		blockLibrary.AddBoxSurfaces(Vector3.zero, Vector3.one, blockLibrary.GetBlockType(worldData.GetBlock(x, y, 0, 0, 0).type), ref surfaces);
 	}
 
 	void UpdateMesh() {

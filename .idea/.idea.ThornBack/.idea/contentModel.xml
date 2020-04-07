@@ -20,6 +20,7 @@
         </e>
         <e p="Scripts" t="Include">
           <e p="BlockLibrary.cs" t="Include" />
+          <e p="CameraController.cs" t="Include" />
           <e p="Chunk.cs" t="Include" />
           <e p="ChunkLoader.cs" t="Include" />
           <e p="Player.cs" t="Include" />

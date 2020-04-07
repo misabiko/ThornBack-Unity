@@ -68,12 +68,8 @@ public class PlayerMovement : MonoBehaviour {
 
 	bool IsGrounded() => true;
 
-	public void OnLook(InputAction.CallbackContext ctx) {
-		var lookInput = ctx.ReadValue<Vector2>();
-		
-		transform.Rotate(Vector3.up, lookInput.x * data.camSensitivityX);
-		camTransform.Rotate(Vector3.right, -lookInput.y * data.camSensitivityY);
-	}
+	public void OnLook(InputAction.CallbackContext ctx)
+		=> transform.Rotate(Vector3.up, ctx.ReadValue<Vector2>().x * data.camSensitivityX);
 
 	public void OnTweak(InputAction.CallbackContext ctx) {}
 }

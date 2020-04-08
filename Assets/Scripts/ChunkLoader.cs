@@ -8,9 +8,11 @@ public class ChunkLoader : MonoBehaviour {
 	public WorldData worldData;
 	public BlockLibrary blockLibrary;
 	public GameObject chunkPrefab;
+	public Transform player;
 
 	Dictionary<string, Chunk> chunks;
 	Queue<Tuple<int, int>> loadingBacklog;
+	int lastChunkX, lastChunkY;
 
 	void Start() {
 		chunks = new Dictionary<string, Chunk>();
@@ -31,8 +33,7 @@ public class ChunkLoader : MonoBehaviour {
 			Debug.Log((numLoaded / backlogSize) * 100 + "%");
 		}
 
-		UpdateLoadingChunks(0, 0);
-		//CreateNewChunk(0, 0);
+		UpdateLoadingChunks();
 	}
 
 	void CreateNewChunk(int x, int y) {
@@ -45,13 +46,13 @@ public class ChunkLoader : MonoBehaviour {
 		chunks.Add(chunkGameObject.name, chunk);
 	}
 
-	void UpdateLoadingChunks(int chunkX, int chunkY) {
+	void UpdateLoadingChunks() {
 		var loadingBacklogList = new List<Tuple<int, int>>();
 
-		for (int x = chunkX - radius; x < chunkX + radius; x++)
-		for (int y = chunkY - radius; y < chunkY + radius; y++) {
+		for (int x = lastChunkX - radius; x < lastChunkX + radius; x++)
+		for (int y = lastChunkY - radius; y < lastChunkY + radius; y++) {
 			if (
-				Mathf.Pow(x - chunkX, 2) + Mathf.Pow(y - chunkY, 2) <= radius * radius &&
+				Mathf.Pow(x - lastChunkX, 2) + Mathf.Pow(y - lastChunkY, 2) <= radius * radius &&
 				!chunks.ContainsKey(WorldData.GetChunkKey(x, y))
 			)
 				loadingBacklogList.Add(Tuple.Create(x, y));
@@ -68,6 +69,8 @@ public class ChunkLoader : MonoBehaviour {
 		=> a.Item1 * a.Item1 + a.Item2 * a.Item2 - b.Item1 * b.Item1 + b.Item2 * b.Item2;
 
 	void Update() {
+		UpdatePlayerChunk();
+		
 		if (HasBacklog())
 			LoadChunks();
 	}
@@ -81,5 +84,17 @@ public class ChunkLoader : MonoBehaviour {
 			Debug.Log("Loading " + WorldData.GetChunkKey(coords.Item1, coords.Item2));
 			CreateNewChunk(coords.Item1, coords.Item2);
 		}
+	}
+
+	void UpdatePlayerChunk() {
+		var pos = player.position;
+		int chunkX = Mathf.FloorToInt(pos.x / WorldData.CHUNK_SIZE);
+		int chunkY = Mathf.FloorToInt(pos.z / WorldData.CHUNK_SIZE);
+
+		if (chunkX == lastChunkX && chunkY == lastChunkY) return;
+
+		lastChunkX = chunkX;
+		lastChunkY = chunkY;
+		UpdateLoadingChunks();
 	}
 }

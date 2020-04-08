@@ -283,6 +283,7 @@ GameObject:
   - component: {fileID: 1175594466}
   - component: {fileID: 1175594465}
   - component: {fileID: 1175594468}
+  - component: {fileID: 1175594470}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -398,6 +399,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f861fbe841c8543a56473901b1d76d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &1175594470
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1175594464}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 127338224b09a1746943cf42157e352c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1222851256
 GameObject:
   m_ObjectHideFlags: 0
@@ -621,6 +641,21 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: f109b762-cd29-4c49-960b-9899b82e46c1
     m_ActionName: Player/Tweak[/Mouse/scroll]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1222851262}
+        m_MethodName: OnPause
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 1e7ee3b3-0d4d-4406-9b07-3b39e045f753
+    m_ActionName: Player/Pause[/Keyboard/escape]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

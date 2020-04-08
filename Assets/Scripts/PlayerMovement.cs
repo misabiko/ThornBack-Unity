@@ -2,20 +2,19 @@
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour {
+	Player player;
 	PlayerData data;
+	CameraController cam;
 	new Rigidbody rigidbody;
-	Transform camTransform;
 	Vector3 moveInput;
 	Vector3 moveDirection;
 	bool sprinting;
 
 	void Awake() {
-		data = GetComponent<Player>()?.data;
+		player = GetComponent<Player>();
+		data = player.data;
 		rigidbody = GetComponent<Rigidbody>();
-
-		Camera cam = Camera.main;
-		if (cam != null)
-			camTransform = cam.transform;
+		cam = GetComponentInChildren<CameraController>();
 	}
 
 	void Update() => moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
@@ -32,6 +31,8 @@ public class PlayerMovement : MonoBehaviour {
 			rigidbody.AddForce(moveDirection * data.accel);
 			ClampVelocityXZ(sprinting ? data.sprintSpeed : data.speed);
 		}
+		
+		cam.SetSpeed(Flatten(rigidbody.velocity).magnitude);
 	}
 	
 	void ClampVelocityXZ(float maxSpeed) {
@@ -58,7 +59,10 @@ public class PlayerMovement : MonoBehaviour {
 		moveInput = input;
 	}
 
-	public void OnSprint(InputAction.CallbackContext ctx) => sprinting = ctx.ReadValueAsButton();
+	public void OnSprint(InputAction.CallbackContext ctx) {
+		sprinting = ctx.ReadValueAsButton();
+		cam.SetSprinting(sprinting);
+	}
 
 	public void OnJump(InputAction.CallbackContext ctx) {
 		if (!ctx.ReadValueAsButton() || !IsGrounded()) return;
@@ -68,8 +72,10 @@ public class PlayerMovement : MonoBehaviour {
 
 	bool IsGrounded() => true;
 
-	public void OnLook(InputAction.CallbackContext ctx)
-		=> transform.Rotate(Vector3.up, ctx.ReadValue<Vector2>().x * data.camSensitivityX);
+	public void OnLook(InputAction.CallbackContext ctx) {
+		if (player.cursorCaptured)
+			transform.Rotate(Vector3.up, ctx.ReadValue<Vector2>().x * data.camSensitivityX);
+	}
 
 	public void OnTweak(InputAction.CallbackContext ctx) {}
 }

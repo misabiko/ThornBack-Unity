@@ -25,6 +25,7 @@
           <e p="Data" t="Include">
             <e p="BlockLibrary.cs" t="Include" />
             <e p="ChunkData.cs" t="Include" />
+            <e p="WorldData.cs" t="Include" />
           </e>
           <e p="Player.cs" t="Include" />
           <e p="PlayerData.cs" t="Include" />
@@ -33,8 +34,8 @@
           <e p="Systems" t="Include">
             <e p="ChunkMeshingSystem.cs" t="Include" />
             <e p="ChunkMeshUpdaterSystem.cs" t="Include" />
+            <e p="WorldGenSystem.cs" t="Include" />
           </e>
-          <e p="WorldData.cs" t="Include" />
         </e>
       </e>
       <e p="obj" t="ExcludeRecursive" />

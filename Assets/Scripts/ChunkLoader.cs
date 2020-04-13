@@ -10,7 +10,9 @@ using UnityEngine;
 public class ChunkLoader : MonoBehaviour {
 	public int radius;
 	public int preloadRadius;
+
 	public WorldData worldData;
+
 	//public BlockLibrary blockLibrary;
 	public GameObject chunkPrefab;
 	public Transform player;
@@ -44,30 +46,30 @@ public class ChunkLoader : MonoBehaviour {
 		}
 
 		UpdateLoadingChunks();*/
-		
+
 		entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-		
+
 		//create entity
 		var blockLibrary = entityManager.CreateEntity(typeof(BlockLibraryData), typeof(BlockTypeData));
 		entityManager.SetName(blockLibrary, "BlockLibrary");
-		
+
 		//create singleton for BlockLibraryData
 		var blockLibraryQuery = entityManager.CreateEntityQuery(typeof(BlockLibraryData));
 		blockLibraryQuery.SetSingleton(new BlockLibraryData {});
-		
+
 		//create BlockMaterial entity
 		var blockMaterial = entityManager.CreateEntity();
 		entityManager.SetName(blockMaterial, "Opaque Material");
 		entityManager.AddSharedComponentData(blockMaterial, new BlockMaterial {
 			value = opaqueMaterial
 		});
-		
+
 		//create BlockMaterialElement buffer
 		var blockMaterialBuffer = entityManager.AddBuffer<BlockMaterialElement>(blockLibrary);
 		int opaqueIndex = blockMaterialBuffer.Add(new BlockMaterialElement {
 			blockMaterial = blockMaterial
 		});
-		
+
 		//create BlockTypeMaterial entity
 		/*var blockTypeMaterials = entityManager.CreateEntity();
 		var blockTypeMaterialBuffer = entityManager.AddBuffer<BlockTypeMaterial>(blockTypeMaterials);
@@ -87,6 +89,13 @@ public class ChunkLoader : MonoBehaviour {
 			materialTop = 0
 		});
 
+		entityManager.CreateEntity(typeof(WorldData));
+		entityManager.CreateEntityQuery(typeof(WorldData))
+			.SetSingleton(new WorldData {
+				CHUNK_SIZE = 16,
+				WORLD_HEIGHT = 128
+			});
+
 		chunkArchetype = entityManager.CreateArchetype(
 			typeof(ChunkData),
 			typeof(Translation),
@@ -104,14 +113,16 @@ public class ChunkLoader : MonoBehaviour {
 			mesh = new Mesh(),
 			material = opaqueMaterial
 		});
-		
+
 		entityManager.AddBuffer<ChunkSubMeshData>(entity);
 		entityManager.AddBuffer<VertexBufferElement>(entity);
 		entityManager.AddBuffer<NormalBufferElement>(entity);
 		entityManager.AddBuffer<UVBufferElement>(entity);
 		entityManager.AddBuffer<IndexBufferElement>(entity);
+		entityManager.AddBuffer<WorldBlockData>(entity);
 
 		entityManager.AddComponentData(entity, new ChunkDirtyTag());
+		entityManager.AddComponentData(entity, new ChunkNotGeneratedTag());
 	}
 
 	/*Chunk CreateNewChunk(int x, int y) {

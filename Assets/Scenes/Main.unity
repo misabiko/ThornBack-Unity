@@ -722,6 +722,7 @@ MonoBehaviour:
     type: 3}
   player: {fileID: 1222851259}
   opaqueMaterial: {fileID: 2100000, guid: a5c413ba21a3767498cabb87ec630dd5, type: 2}
+  cubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1464034128
 Transform:
   m_ObjectHideFlags: 0

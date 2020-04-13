@@ -89,6 +89,8 @@ public class ChunkLoader : MonoBehaviour {
 
 		chunkArchetype = entityManager.CreateArchetype(
 			typeof(ChunkData),
+			typeof(Translation),
+			typeof(Rotation),
 			typeof(RenderMesh),
 			typeof(RenderBounds),
 			typeof(LocalToWorld)

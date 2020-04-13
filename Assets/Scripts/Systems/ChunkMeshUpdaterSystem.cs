@@ -15,32 +15,12 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 
 		//Debug.Log("Pre : " + dirtyChunks.Length);
 		foreach (Entity dirtyChunk in dirtyChunks) {
-			Debug.Log("Dirty");
 			RenderMesh renderMesh = EntityManager.GetSharedComponentData<RenderMesh>(dirtyChunk);
 			var mesh = renderMesh.mesh;
 
 			mesh.Clear();
 			//mesh.subMeshCount = blockLibrary.GetTypeCount();
 			mesh.subMeshCount = 8;
-
-			/*var vertices = new NativeList<float3>();
-			var normals = new NativeList<float3>();
-			var UVs = new NativeList<float2>();
-			var indices = new NativeHashMap<int, NativeArray<int>>();
-
-			int vertexCount = 0;
-			foreach (var subMeshData in EntityManager.GetComponentData<ChunkMeshData>(dirtyChunk).value) {
-				var subMeshIndices = subMeshData.indexBuffer.Reinterpret<int>();
-				indices[subMeshData.blockType] = subMeshIndices.ToNativeArray(Allocator.Temp);
-
-				foreach (VertexBufferElement vertexInfo in subMeshData.vertexBuffer) {
-					vertices.Add(vertexInfo.vertex);
-					normals.Add(vertexInfo.normal);
-					UVs.Add(vertexInfo.uv);
-				}
-
-				vertexCount += subMeshData.vertexBuffer.Length;
-			}*/
 			
 			mesh.SetVertices(EntityManager.GetBuffer<VertexBufferElement>(dirtyChunk).AsNativeArray());
 			mesh.SetNormals(EntityManager.GetBuffer<NormalBufferElement>(dirtyChunk).AsNativeArray());
@@ -56,23 +36,12 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 				indices.Dispose();
 			}
 
-			/*var keyArray = indices.GetKeyArray(Allocator.Temp);
-			foreach (int i in keyArray) {
-				mesh.SetIndices(indices[i], MeshTopology.Triangles, i);
-				indices[i].Dispose();
-			}
-
-			keyArray.Dispose();
-			indices.Dispose();
-
-			vertices.Dispose();
-			normals.Dispose();
-			UVs.Dispose();*/
-
 			renderMesh.mesh = mesh;
-			renderMesh.subMesh = 0;
 			renderMesh.material = opaqueMaterial;
 			EntityManager.SetSharedComponentData(dirtyChunk, renderMesh);
+			EntityManager.SetComponentData(dirtyChunk, new RenderBounds {
+				Value = mesh.bounds.ToAABB()
+			});
 		}
 
 		EntityManager.RemoveComponent<ChunkApplyMeshingTag>(dirtyChunkQuery);

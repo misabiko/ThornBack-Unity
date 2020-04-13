@@ -260,6 +260,10 @@ public struct BlockMaterial : ISharedComponentData, IEquatable<BlockMaterial> {
 	public override bool Equals(object obj) => obj is BlockMaterial other && Equals(other);
 
 	public override int GetHashCode() => (value != null ? value.GetHashCode() : 0);
+	
+	public static implicit operator Material(BlockMaterial e) => e.value;
+
+	public static implicit operator BlockMaterial(Material e) => new BlockMaterial { value = e };
 }
 
 public struct BlockTypeData : IBufferElementData {

@@ -5,26 +5,39 @@ public struct ChunkData : IComponentData {
 	public int x, y;
 }
 
-public struct ChunkMeshData : IComponentData {
+/*public struct ChunkMeshData : IComponentData {
 	public DynamicBuffer<ChunkSubMeshData> value;
-}
+	public int boo;
+}*/
 
 public struct ChunkSubMeshData : IBufferElementData {
 	public int blockType;
-	public DynamicBuffer<VertexBufferElement> vertexBuffer;
-	public DynamicBuffer<IndexBufferElement> indexBuffer;
+	public int indexOffset;
+	public int indexLength;
 }
 
 public struct VertexBufferElement : IBufferElementData {
-	public float3 vertex;
-	public float3 normal;
-	public float2 uv;
+	public float3 value;
+	
+	public static implicit operator float3(VertexBufferElement e) => e.value;
 
-	public VertexBufferElement(float3 vertex, float3 normal, float2 uv) {
-		this.vertex = vertex;
-		this.normal = normal;
-		this.uv = uv;
-	}
+	public static implicit operator VertexBufferElement(float3 e) => new VertexBufferElement { value = e };
+}
+
+public struct NormalBufferElement : IBufferElementData {
+	public float3 value;
+	
+	public static implicit operator float3(NormalBufferElement e) => e.value;
+
+	public static implicit operator NormalBufferElement(float3 e) => new NormalBufferElement { value = e };
+}
+
+public struct UVBufferElement : IBufferElementData {
+	public float2 value;
+	
+	public static implicit operator float2(UVBufferElement e) => e.value;
+
+	public static implicit operator UVBufferElement(float2 e) => new UVBufferElement { value = e };
 }
 
 public struct IndexBufferElement : IBufferElementData {

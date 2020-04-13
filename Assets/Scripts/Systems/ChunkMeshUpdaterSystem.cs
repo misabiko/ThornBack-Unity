@@ -6,10 +6,16 @@ using UnityEngine;
 
 public class ChunkMeshUpdaterSystem : SystemBase {
 	protected override void OnUpdate() {
+		var blockLibrary = GetSingletonEntity<BlockLibraryData>();
+		var blockMaterial = EntityManager.GetBuffer<BlockMaterialElement>(blockLibrary)[0].blockMaterial;
+		var opaqueMaterial = EntityManager.GetSharedComponentData<BlockMaterial>(blockMaterial);
+		
 		var dirtyChunkQuery = GetEntityQuery(typeof(ChunkApplyMeshingTag));
 		var dirtyChunks = dirtyChunkQuery.ToEntityArray(Allocator.TempJob);
 
+		//Debug.Log("Pre : " + dirtyChunks.Length);
 		foreach (Entity dirtyChunk in dirtyChunks) {
+			Debug.Log("Dirty");
 			RenderMesh renderMesh = EntityManager.GetSharedComponentData<RenderMesh>(dirtyChunk);
 			var mesh = renderMesh.mesh;
 
@@ -17,7 +23,7 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 			//mesh.subMeshCount = blockLibrary.GetTypeCount();
 			mesh.subMeshCount = 8;
 
-			var vertices = new NativeList<float3>();
+			/*var vertices = new NativeList<float3>();
 			var normals = new NativeList<float3>();
 			var UVs = new NativeList<float2>();
 			var indices = new NativeHashMap<int, NativeArray<int>>();
@@ -34,13 +40,23 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 				}
 
 				vertexCount += subMeshData.vertexBuffer.Length;
+			}*/
+			
+			mesh.SetVertices(EntityManager.GetBuffer<VertexBufferElement>(dirtyChunk).AsNativeArray());
+			mesh.SetNormals(EntityManager.GetBuffer<NormalBufferElement>(dirtyChunk).AsNativeArray());
+			mesh.SetUVs(0, EntityManager.GetBuffer<UVBufferElement>(dirtyChunk).AsNativeArray());
+
+			var indexBuffer = EntityManager.GetBuffer<IndexBufferElement>(dirtyChunk);
+			foreach (ChunkSubMeshData subMeshData in EntityManager.GetBuffer<ChunkSubMeshData>(dirtyChunk)) {
+				var indices = new NativeArray<int>(subMeshData.indexLength - subMeshData.indexOffset, Allocator.Temp);
+				for (int i = 0; i < subMeshData.indexLength - subMeshData.indexOffset; i++)
+					indices[i] = indexBuffer[subMeshData.indexOffset + i];
+				
+				mesh.SetIndices(indices, MeshTopology.Triangles, subMeshData.blockType);
+				indices.Dispose();
 			}
 
-			mesh.SetVertices(vertices.AsArray());
-			mesh.SetNormals(normals.AsArray());
-			mesh.SetUVs(0, UVs.AsArray());
-
-			var keyArray = indices.GetKeyArray(Allocator.Temp);
+			/*var keyArray = indices.GetKeyArray(Allocator.Temp);
 			foreach (int i in keyArray) {
 				mesh.SetIndices(indices[i], MeshTopology.Triangles, i);
 				indices[i].Dispose();
@@ -51,7 +67,12 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 
 			vertices.Dispose();
 			normals.Dispose();
-			UVs.Dispose();
+			UVs.Dispose();*/
+
+			renderMesh.mesh = mesh;
+			renderMesh.subMesh = 0;
+			renderMesh.material = opaqueMaterial;
+			EntityManager.SetSharedComponentData(dirtyChunk, renderMesh);
 		}
 
 		EntityManager.RemoveComponent<ChunkApplyMeshingTag>(dirtyChunkQuery);

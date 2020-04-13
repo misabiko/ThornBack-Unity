@@ -102,6 +102,12 @@ public class ChunkLoader : MonoBehaviour {
 			mesh = new Mesh(),
 			material = opaqueMaterial
 		});
+		
+		entityManager.AddBuffer<ChunkSubMeshData>(entity);
+		entityManager.AddBuffer<VertexBufferElement>(entity);
+		entityManager.AddBuffer<NormalBufferElement>(entity);
+		entityManager.AddBuffer<UVBufferElement>(entity);
+		entityManager.AddBuffer<IndexBufferElement>(entity);
 
 		entityManager.AddComponentData(entity, new ChunkDirtyTag());
 	}

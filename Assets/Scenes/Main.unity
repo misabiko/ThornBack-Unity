@@ -721,7 +721,7 @@ MonoBehaviour:
   chunkPrefab: {fileID: 813285466925429110, guid: 0b9ee82f12fe6bc4d8e00ce4ca05c605,
     type: 3}
   player: {fileID: 1222851259}
-  opaqueMaterial: {fileID: 0}
+  opaqueMaterial: {fileID: 2100000, guid: a5c413ba21a3767498cabb87ec630dd5, type: 2}
 --- !u!4 &1464034128
 Transform:
   m_ObjectHideFlags: 0

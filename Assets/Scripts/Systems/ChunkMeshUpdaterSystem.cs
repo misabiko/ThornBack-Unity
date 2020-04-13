@@ -4,15 +4,15 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using UnityEngine;
 
-public class ChunkMeshSystem : SystemBase {
+public class ChunkMeshUpdaterSystem : SystemBase {
 	protected override void OnUpdate() {
 		var dirtyChunkQuery = GetEntityQuery(typeof(ChunkApplyMeshingTag));
 		var dirtyChunks = dirtyChunkQuery.ToEntityArray(Allocator.TempJob);
-		
+
 		foreach (Entity dirtyChunk in dirtyChunks) {
 			RenderMesh renderMesh = EntityManager.GetSharedComponentData<RenderMesh>(dirtyChunk);
 			var mesh = renderMesh.mesh;
-			
+
 			mesh.Clear();
 			//mesh.subMeshCount = blockLibrary.GetTypeCount();
 			mesh.subMeshCount = 8;
@@ -30,9 +30,9 @@ public class ChunkMeshSystem : SystemBase {
 				foreach (VertexBufferElement vertexInfo in subMeshData.vertexBuffer) {
 					vertices.Add(vertexInfo.vertex);
 					normals.Add(vertexInfo.normal);
-					UVs.Add(vertexInfo.uv);	
+					UVs.Add(vertexInfo.uv);
 				}
-				
+
 				vertexCount += subMeshData.vertexBuffer.Length;
 			}
 
@@ -59,4 +59,3 @@ public class ChunkMeshSystem : SystemBase {
 		dirtyChunks.Dispose();
 	}
 }
-

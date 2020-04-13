@@ -18,7 +18,7 @@ public class ChunkMeshingSystem : SystemBase {
 
 	protected override void OnCreate() {
 		endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-		
+
 		RequireSingletonForUpdate<BlockLibraryData>();
 	}
 
@@ -31,95 +31,90 @@ public class ChunkMeshingSystem : SystemBase {
 
 		//ToConcurrent makes it so we can use it in parallel jobs
 		var ecb = endSimulationEcbSystem.CreateCommandBuffer().ToConcurrent();
-		
+
 		Entities
 			.WithAll<ChunkDirtyTag>()
 			.ForEach((Entity e, int entityInQueryIndex, ref ChunkMeshData meshData, in ChunkData data) => {
 				AddBoxSurfaces(new float3(0, 0, 0), new float3(1, 1, 1), blockTypes[0], meshData.value);
-				/*var origin = new float3(0, 0, 0);
-				var size = new float3(1, 1, 1);
-				*/
 
-				
-				
 				ecb.RemoveComponent<ChunkDirtyTag>(entityInQueryIndex, e);
 				ecb.AddComponent<ChunkApplyMeshingTag>(entityInQueryIndex, e);
 			})
 			.WithDeallocateOnJobCompletion(blockTypes)
 			.ScheduleParallel();
-		
+
 		endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
 	}
 
 	static void AddBoxSurfaces(float3 origin, float3 size, BlockTypeData type, DynamicBuffer<ChunkSubMeshData> meshData) {
 		//Add missing blockTypes to ChunkMeshData
-				for (int i = 0; i < 6; i++) {
-					bool found = false;
-					for (int j = 0; j < meshData.Length; ++j)
-						if (meshData[j].blockType == type.index) {
-							found = true;
-							break;
-						}
-					
-					if (!found)
-						meshData.Add(new ChunkSubMeshData {
-							blockType = type.index
-						});
+		for (int i = 0; i < 6; i++) {
+			bool found = false;
+			for (int j = 0; j < meshData.Length; ++j)
+				if (meshData[j].blockType == type.index) {
+					found = true;
+					break;
 				}
 
-				AddSurface(
-					origin + new float3(0, 0, size.z),
-					origin + new float3(0, size.y, size.z),
-					origin + new float3(size.x, size.y, size.z),
-					origin + new float3(size.x, 0, size.z),
-					(int) size.x, (int) size.y,
-					Direction.South, meshData[type.materialSouth]
-				);
+			if (!found)
+				meshData.Add(new ChunkSubMeshData {
+					blockType = type.index
+				});
+		}
 
-				AddSurface(
-					origin,
-					origin + new float3(0, size.y, 0),
-					origin + new float3(size.x, size.y, 0),
-					origin + new float3(size.x, 0, 0),
-					(int) size.x, (int) size.y,
-					Direction.North, meshData[type.materialNorth]
-				);
+		AddSurface(
+			origin + new float3(0, 0, size.z),
+			origin + new float3(0, size.y, size.z),
+			origin + new float3(size.x, size.y, size.z),
+			origin + new float3(size.x, 0, size.z),
+			(int) size.x, (int) size.y,
+			Direction.South, meshData[type.materialSouth]
+		);
 
-				AddSurface(
-					origin,
-					origin + new float3(0, size.y, 0),
-					origin + new float3(0, size.y, size.z),
-					origin + new float3(0, 0, size.z),
-					(int) size.z, (int) size.y,
-					Direction.West, meshData[type.materialWest]
-				);
+		AddSurface(
+			origin,
+			origin + new float3(0, size.y, 0),
+			origin + new float3(size.x, size.y, 0),
+			origin + new float3(size.x, 0, 0),
+			(int) size.x, (int) size.y,
+			Direction.North, meshData[type.materialNorth]
+		);
 
-				AddSurface(
-					origin + new float3(size.x, 0, 0),
-					origin + new float3(size.x, size.y, 0),
-					origin + new float3(size.x, size.y, size.z),
-					origin + new float3(size.x, 0, size.z),
-					(int) size.z, (int) size.y,
-					Direction.East, meshData[type.materialEast]
-				);
+		AddSurface(
+			origin,
+			origin + new float3(0, size.y, 0),
+			origin + new float3(0, size.y, size.z),
+			origin + new float3(0, 0, size.z),
+			(int) size.z, (int) size.y,
+			Direction.West, meshData[type.materialWest]
+		);
 
-				AddSurface(
-					origin,
-					origin + new float3(0, 0, size.z),
-					origin + new float3(size.x, 0, size.z),
-					origin + new float3(size.x, 0, 0),
-					(int) size.x, (int) size.z,
-					Direction.Bottom, meshData[type.materialBottom]
-				);
+		AddSurface(
+			origin + new float3(size.x, 0, 0),
+			origin + new float3(size.x, size.y, 0),
+			origin + new float3(size.x, size.y, size.z),
+			origin + new float3(size.x, 0, size.z),
+			(int) size.z, (int) size.y,
+			Direction.East, meshData[type.materialEast]
+		);
 
-				AddSurface(
-					origin + new float3(0, size.y, 0),
-					origin + new float3(0, size.y, size.z),
-					origin + new float3(size.x, size.y, size.z),
-					origin + new float3(size.x, size.y, 0),
-					(int) size.x, (int) size.z,
-					Direction.Top, meshData[type.materialTop]
-				);
+		AddSurface(
+			origin,
+			origin + new float3(0, 0, size.z),
+			origin + new float3(size.x, 0, size.z),
+			origin + new float3(size.x, 0, 0),
+			(int) size.x, (int) size.z,
+			Direction.Bottom, meshData[type.materialBottom]
+		);
+
+		AddSurface(
+			origin + new float3(0, size.y, 0),
+			origin + new float3(0, size.y, size.z),
+			origin + new float3(size.x, size.y, size.z),
+			origin + new float3(size.x, size.y, 0),
+			(int) size.x, (int) size.z,
+			Direction.Top, meshData[type.materialTop]
+		);
 	}
 
 	static void AddSurface(float3 bottomLeft, float3 topLeft, float3 topRight, float3 bottomRight, int w, int h, Direction side, ChunkSubMeshData subMeshData) {
@@ -157,27 +152,28 @@ public class ChunkMeshingSystem : SystemBase {
 		foreach (int newIndex in newIndices)
 			surface.indices.Add(surface.vertices.Count + newIndex);*/
 		//}else {
-			if (((int) side) % 2 == 0) {
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 3);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 0);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
-			}else {
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 0);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 3);
-				subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
-			}
+		if (((int) side) % 2 == 0) {
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 3);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 0);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
+		}
+		else {
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 0);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 1);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 3);
+			subMeshData.indexBuffer.Add(subMeshData.vertexBuffer.Length + 2);
+		}
 		//}
 
-		subMeshData.vertexBuffer.Add(new VertexBufferElement(bottomLeft,	normal, new float2(0, 0)));
-		subMeshData.vertexBuffer.Add(new VertexBufferElement(bottomRight,	normal, new float2(w, 0)));
-		subMeshData.vertexBuffer.Add(new VertexBufferElement(topLeft,		normal, new float2(0, h)));
-		subMeshData.vertexBuffer.Add(new VertexBufferElement(topRight,	normal, new float2(w, h)));
+		subMeshData.vertexBuffer.Add(new VertexBufferElement(bottomLeft, normal, new float2(0, 0)));
+		subMeshData.vertexBuffer.Add(new VertexBufferElement(bottomRight, normal, new float2(w, 0)));
+		subMeshData.vertexBuffer.Add(new VertexBufferElement(topLeft, normal, new float2(0, h)));
+		subMeshData.vertexBuffer.Add(new VertexBufferElement(topRight, normal, new float2(w, h)));
 	}
 }
 

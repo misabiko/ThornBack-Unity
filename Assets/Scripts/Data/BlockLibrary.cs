@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using Unity.Entities;
 using UnityEngine;
 
 [CreateAssetMenu]
 public class BlockLibrary : ScriptableObject {
-	enum Direction {
+	/*enum Direction {
 		NORTH = 0,
 		SOUTH = 1,
 		EAST = 2,
@@ -161,7 +160,7 @@ else
 	newIndices = new int[] {2,0,1,2, 1,3,2,1};
 
 foreach (int newIndex in newIndices)
-	surface.indices.Add(surface.vertices.Count + newIndex);*/
+	surface.indices.Add(surface.vertices.Count + newIndex);#1#
 //}else { 
 		int[] newIndices;
 		if (((int) side) % 2 == 0)
@@ -244,5 +243,43 @@ foreach (int newIndex in newIndices)
 			(int) size.x, (int) size.z,
 			Direction.TOP, surfaces[type.materials[5]]
 		);
-	}
+	}*/
 }
+
+public struct BlockLibraryData : IComponentData {}
+
+public struct BlockMaterialElement : IBufferElementData {
+	public Entity blockMaterial;
+}
+
+public struct BlockMaterial : ISharedComponentData, IEquatable<BlockMaterial> {
+	public Material value;
+
+	public bool Equals(BlockMaterial other) => Equals(value, other.value);
+
+	public override bool Equals(object obj) => obj is BlockMaterial other && Equals(other);
+
+	public override int GetHashCode() => (value != null ? value.GetHashCode() : 0);
+}
+
+public struct BlockTypeData : IBufferElementData {
+	//public string name;
+	public int index;	//type index
+	//public Entity materialBuffer;	//entity having the BlockTypeMaterial DynamicBuffer
+	public int materialSouth;
+	public int materialNorth;
+	public int materialWest;
+	public int materialEast;
+	public int materialBottom;
+	public int materialTop;
+}
+
+//points to a BlockMaterial index of the BlockLibrary singleton
+/*[InternalBufferCapacity(6)]
+public struct BlockTypeMaterial : IBufferElementData {
+	public int value;
+	
+	public static implicit operator int(BlockTypeMaterial e) => e.value;
+
+	public static implicit operator BlockTypeMaterial(int e) => new BlockTypeMaterial { value = e };
+}*/

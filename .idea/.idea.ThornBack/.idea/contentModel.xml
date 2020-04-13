@@ -19,14 +19,21 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
-          <e p="BlockLibrary.cs" t="Include" />
           <e p="CameraController.cs" t="Include" />
           <e p="Chunk.cs" t="Include" />
           <e p="ChunkLoader.cs" t="Include" />
+          <e p="Data" t="Include">
+            <e p="BlockLibrary.cs" t="Include" />
+            <e p="ChunkData.cs" t="Include" />
+          </e>
           <e p="Player.cs" t="Include" />
           <e p="PlayerData.cs" t="Include" />
           <e p="PlayerMovement.cs" t="Include" />
           <e p="StayAABB.cs" t="Include" />
+          <e p="Systems" t="Include">
+            <e p="ChunkMeshingSystem.cs" t="Include" />
+            <e p="ChunkMeshSystem.cs" t="Include" />
+          </e>
           <e p="WorldData.cs" t="Include" />
         </e>
       </e>

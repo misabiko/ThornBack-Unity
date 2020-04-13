@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
+using Unity.Rendering;
+using Unity.Transforms;
 using UnityEngine;
 
 public class ChunkLoader : MonoBehaviour {
 	public int radius;
 	public int preloadRadius;
 	public WorldData worldData;
-	public BlockLibrary blockLibrary;
+	//public BlockLibrary blockLibrary;
 	public GameObject chunkPrefab;
 	public Transform player;
 
@@ -14,8 +19,13 @@ public class ChunkLoader : MonoBehaviour {
 	Queue<Tuple<int, int>> loadingBacklog;
 	int lastChunkX, lastChunkY;
 
+	EntityManager entityManager;
+	EntityArchetype chunkArchetype;
+
+	public Material opaqueMaterial;
+
 	void Start() {
-		chunks = new Dictionary<string, Chunk>();
+		/*chunks = new Dictionary<string, Chunk>();
 		loadingBacklog = new Queue<Tuple<int, int>>();
 
 		blockLibrary.Init();
@@ -33,10 +43,70 @@ public class ChunkLoader : MonoBehaviour {
 			Debug.Log((numLoaded / backlogSize) * 100 + "%");
 		}
 
-		UpdateLoadingChunks();
+		UpdateLoadingChunks();*/
+		
+		entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+		
+		//create entity
+		var blockLibrary = entityManager.CreateEntity(typeof(BlockLibraryData), typeof(BlockTypeData));
+		entityManager.SetName(blockLibrary, "BlockLibrary");
+		
+		//create singleton for BlockLibraryData
+		var blockLibraryQuery = entityManager.CreateEntityQuery(typeof(BlockLibraryData));
+		blockLibraryQuery.SetSingleton(new BlockLibraryData {});
+		
+		//create BlockMaterial entity
+		var blockMaterial = entityManager.CreateEntity();
+		entityManager.SetName(blockMaterial, "Opaque Material");
+		entityManager.AddSharedComponentData(blockMaterial, new BlockMaterial {
+			value = opaqueMaterial
+		});
+		
+		//create BlockMaterialElement buffer
+		var blockMaterialBuffer = entityManager.AddBuffer<BlockMaterialElement>(blockLibrary);
+		int opaqueIndex = blockMaterialBuffer.Add(new BlockMaterialElement {
+			blockMaterial = blockMaterial
+		});
+		
+		//create BlockTypeMaterial entity
+		/*var blockTypeMaterials = entityManager.CreateEntity();
+		var blockTypeMaterialBuffer = entityManager.AddBuffer<BlockTypeMaterial>(blockTypeMaterials);
+		for (int i = 0; i < 6; i++)
+			blockTypeMaterialBuffer.Add(opaqueIndex);*/
+
+		//create BlockTypeData buffer
+		var blockTypes = entityManager.AddBuffer<BlockTypeData>(blockLibrary);
+		blockTypes.Add(new BlockTypeData {
+			index = 0,
+			//materialBuffer = blockTypeMaterials
+			materialSouth = 0,
+			materialNorth = 0,
+			materialWest = 0,
+			materialEast = 0,
+			materialBottom = 0,
+			materialTop = 0
+		});
+
+		chunkArchetype = entityManager.CreateArchetype(
+			typeof(ChunkData),
+			typeof(RenderMesh),
+			typeof(RenderBounds),
+			typeof(LocalToWorld)
+		);
+
+		var entity = entityManager.CreateEntity(chunkArchetype);
+		entityManager.SetComponentData(entity, new ChunkData {
+			x = 0, y = 0
+		});
+		entityManager.SetSharedComponentData(entity, new RenderMesh() {
+			mesh = new Mesh(),
+			material = opaqueMaterial
+		});
+
+		entityManager.AddComponentData(entity, new ChunkDirtyTag());
 	}
 
-	void CreateNewChunk(int x, int y) {
+	/*Chunk CreateNewChunk(int x, int y) {
 		GameObject chunkGameObject = Instantiate(chunkPrefab, transform);
 
 		Chunk chunk = chunkGameObject.GetComponent<Chunk>();
@@ -44,6 +114,8 @@ public class ChunkLoader : MonoBehaviour {
 
 		chunkGameObject.name = WorldData.GetChunkKey(x, y);
 		chunks.Add(chunkGameObject.name, chunk);
+
+		return chunk;
 	}
 
 	void UpdateLoadingChunks() {
@@ -70,20 +142,21 @@ public class ChunkLoader : MonoBehaviour {
 
 	void Update() {
 		UpdatePlayerChunk();
-		
-		if (HasBacklog())
-			LoadChunks();
-	}
 
-	bool HasBacklog() => loadingBacklog.Count > 0;
+		var chunkDataArray = new NativeArray<Chunk.Data>(loadingBacklog.Count, Allocator.TempJob);
+		var job = new ChunkMesherJob();
 
-	void LoadChunks() {
-		while (HasBacklog()) {
+		int i = 0;
+		while (loadingBacklog.Count > 0) {
 			Tuple<int, int> coords = loadingBacklog.Dequeue();
 
 			Debug.Log("Loading " + WorldData.GetChunkKey(coords.Item1, coords.Item2));
-			CreateNewChunk(coords.Item1, coords.Item2);
+			chunkDataArray[i++] = new Chunk.Data(CreateNewChunk(coords.Item1, coords.Item2));
 		}
+
+		var jobHandle = job.Schedule(chunkDataArray.Length, 1);
+		jobHandle.Complete();
+		chunkDataArray.Dispose();
 	}
 
 	void UpdatePlayerChunk() {
@@ -96,5 +169,5 @@ public class ChunkLoader : MonoBehaviour {
 		lastChunkX = chunkX;
 		lastChunkY = chunkY;
 		UpdateLoadingChunks();
-	}
+	}*/
 }

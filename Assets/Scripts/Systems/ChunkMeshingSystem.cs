@@ -23,17 +23,12 @@ public class ChunkMeshingSystem : SystemBase {
 	}
 
 	protected override void OnUpdate() {
-		var blockLibrary = GetSingletonEntity<BlockLibraryData>();
-		var blockTypes = EntityManager.GetBuffer<BlockTypeData>(blockLibrary).ToNativeArray(Allocator.TempJob);
-
-		var worldData = GetSingleton<WorldData>();
-		//var worldBlockBufferEntities = GetEntityQuery(ComponentType.ReadOnly<WorldBlockData>()).ToEntityArray(Allocator.TempJob);
-		//var worldBlockBuffers = GetBufferFromEntity<ComponentType.ReadOnly<WorldBlockData>>();
-
 		//ToConcurrent makes it so we can use it in parallel jobs
 		EntityCommandBuffer.Concurrent ecb = endSimulationEcbSystem.CreateCommandBuffer().ToConcurrent();
-		
-		NativeArray<bool> voxelMask = new NativeArray<bool>(worldData.CHUNK_SIZE * worldData.WORLD_HEIGHT * worldData.CHUNK_SIZE, Allocator.TempJob);
+
+		Entity blockLibrary = GetSingletonEntity<BlockLibraryData>();
+		var blockTypes = EntityManager.GetBuffer<BlockTypeData>(blockLibrary).ToNativeArray(Allocator.TempJob);
+		var worldData = GetSingleton<WorldData>();
 
 		Entities
 			.WithAll<ChunkDirtyTag>()
@@ -47,6 +42,8 @@ public class ChunkMeshingSystem : SystemBase {
 				ref DynamicBuffer<IndexBufferElement> indexBuffer,
 				in DynamicBuffer<WorldBlockData> worldBlockBuffer
 			) => {
+				NativeArray<bool> voxelMask = new NativeArray<bool>(worldData.CHUNK_SIZE * worldData.WORLD_HEIGHT * worldData.CHUNK_SIZE, Allocator.Temp);
+				
 				for (int i = 0; i < voxelMask.Length; i++)
 					voxelMask[i] = false;
 
@@ -54,24 +51,25 @@ public class ChunkMeshingSystem : SystemBase {
 				for (int i = 0; i < worldData.CHUNK_SIZE; i++)
 				for (int j = 0; j < worldData.WORLD_HEIGHT; j++)
 				for (int k = 0; k < worldData.CHUNK_SIZE; k++)
-					if (!voxelMask[Get3dIndex(worldData, i, j, k)] && GetBlockType(worldBlockBuffer, worldData,i, j, k) > 0) {
+					if (!voxelMask[Get3dIndex(worldData, i, j, k)] && GetBlockType(worldBlockBuffer, worldData, i, j, k) > 0) {
 						voxelMask[Get3dIndex(worldData, i, j, k)] = true;
-						cubeSize = new float3(1, 1, 1);
+						cubeSize = new float3(1);
 
-						for (int di = 1; di < worldData.CHUNK_SIZE - i; di++)
-							if (voxelMask[Get3dIndex(worldData, i + di, j, k)] || (GetBlockType(worldBlockBuffer, worldData,i + di, j, k) != GetBlockType(worldBlockBuffer, worldData,i, j, k))) {
+						for (int di = 1; di < worldData.CHUNK_SIZE - i; di++) {
+							if (voxelMask[Get3dIndex(worldData, i + di, j, k)] || (GetBlockType(worldBlockBuffer, worldData, i + di, j, k) != GetBlockType(worldBlockBuffer, worldData, i, j, k))) {
 								cubeSize.x += di - 1;
 								goto fullbreak1;
 							}
 							else
 								voxelMask[Get3dIndex(worldData, i + di, j, k)] = true;
+						}
 
 						cubeSize.x += worldData.CHUNK_SIZE - i - 1; //This is skipped if goto fullbreak1
 						fullbreak1:
 
 						for (int dk = 1; dk < worldData.CHUNK_SIZE - k; dk++) {
 							for (int di = 0; di < cubeSize.x; di++)
-								if (voxelMask[Get3dIndex(worldData, i + di, j, k + dk)] || (GetBlockType(worldBlockBuffer, worldData,i + di, j, k + dk) != GetBlockType(worldBlockBuffer, worldData,i, j, k))) {
+								if (voxelMask[Get3dIndex(worldData, i + di, j, k + dk)] || (GetBlockType(worldBlockBuffer, worldData, i + di, j, k + dk) != GetBlockType(worldBlockBuffer, worldData, i, j, k))) {
 									cubeSize.z += dk - 1;
 									goto fullbreak2;
 								}
@@ -86,7 +84,7 @@ public class ChunkMeshingSystem : SystemBase {
 						for (int dj = 1; dj < worldData.WORLD_HEIGHT - j; dj++) {
 							for (int dk = 0; dk < cubeSize.z; dk++)
 							for (int di = 0; di < cubeSize.x; di++)
-								if (voxelMask[Get3dIndex(worldData, i + di, j + dj, k + dk)] || (GetBlockType(worldBlockBuffer, worldData,i + di, j + dj, k + dk) != GetBlockType(worldBlockBuffer, worldData,i, j, k))) {
+								if (voxelMask[Get3dIndex(worldData, i + di, j + dj, k + dk)] || (GetBlockType(worldBlockBuffer, worldData, i + di, j + dj, k + dk) != GetBlockType(worldBlockBuffer, worldData, i, j, k))) {
 									cubeSize.y += dj - 1;
 									goto fullbreak3;
 								}
@@ -107,13 +105,13 @@ public class ChunkMeshingSystem : SystemBase {
 
 						AddBoxSurfaces(pos, cubeSize, blockTypes[0], subMeshBuffer, vertexBuffer, normalBuffer, uvBuffer, indexBuffer);
 					}
-				
-				
+
 				ecb.RemoveComponent<ChunkDirtyTag>(entityInQueryIndex, e);
 				ecb.AddComponent<ChunkApplyMeshingTag>(entityInQueryIndex, e);
+
+				voxelMask.Dispose();
 			})
 			.WithDeallocateOnJobCompletion(blockTypes)
-			.WithDeallocateOnJobCompletion(voxelMask)
 			.ScheduleParallel();
 
 		endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
@@ -132,7 +130,7 @@ public class ChunkMeshingSystem : SystemBase {
 		DynamicBuffer<NormalBufferElement> normalBuffer,
 		DynamicBuffer<UVBufferElement> uvBuffer,
 		DynamicBuffer<IndexBufferElement> indexBuffer
-		) {
+	) {
 		AddSurface(
 			origin + new float3(0, 0, size.z),
 			origin + new float3(0, size.y, size.z),
@@ -214,7 +212,7 @@ public class ChunkMeshingSystem : SystemBase {
 		DynamicBuffer<NormalBufferElement> normalBuffer,
 		DynamicBuffer<UVBufferElement> uvBuffer,
 		DynamicBuffer<IndexBufferElement> indexBuffer
-		) {
+	) {
 		float3 normal;
 		switch (side) {
 			case Direction.North:
@@ -248,41 +246,41 @@ public class ChunkMeshingSystem : SystemBase {
 
 		foreach (int newIndex in newIndices)
 			surface.indices.Add(surface.vertices.Count + newIndex);*/
-						//}else {
+		//}else {
 
-						var subMeshData = meshData[subMeshIndex];
-						if (((int) side) % 2 == 0) {
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength, vertexBuffer.Length + 2);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 1, vertexBuffer.Length + 3);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 2, vertexBuffer.Length + 1);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 3, vertexBuffer.Length + 1);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 4, vertexBuffer.Length + 0);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 5, vertexBuffer.Length + 2);
-						}
-						else {
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength, vertexBuffer.Length + 2);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 1, vertexBuffer.Length + 0);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 2, vertexBuffer.Length + 1);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 3, vertexBuffer.Length + 1);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 4, vertexBuffer.Length + 3);
-							indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 5, vertexBuffer.Length + 2);
-						}
+		var subMeshData = meshData[subMeshIndex];
+		if (((int) side) % 2 == 0) {
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength, vertexBuffer.Length + 2);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 1, vertexBuffer.Length + 3);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 2, vertexBuffer.Length + 1);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 3, vertexBuffer.Length + 1);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 4, vertexBuffer.Length + 0);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 5, vertexBuffer.Length + 2);
+		}
+		else {
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength, vertexBuffer.Length + 2);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 1, vertexBuffer.Length + 0);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 2, vertexBuffer.Length + 1);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 3, vertexBuffer.Length + 1);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 4, vertexBuffer.Length + 3);
+			indexBuffer.Insert(subMeshData.indexOffset + subMeshData.indexLength + 5, vertexBuffer.Length + 2);
+		}
 
-						subMeshData.indexLength += 6;
-						meshData[subMeshIndex] = subMeshData;
-						//}
+		subMeshData.indexLength += 6;
+		meshData[subMeshIndex] = subMeshData;
+		//}
 
-						vertexBuffer.Add(bottomLeft);
-						vertexBuffer.Add(bottomRight);
-						vertexBuffer.Add(topLeft);
-						vertexBuffer.Add(topRight);
+		vertexBuffer.Add(bottomLeft);
+		vertexBuffer.Add(bottomRight);
+		vertexBuffer.Add(topLeft);
+		vertexBuffer.Add(topRight);
 
-						for (int i = 0; i < 4; ++i)
-							normalBuffer.Add(normal);
+		for (int i = 0; i < 4; ++i)
+			normalBuffer.Add(normal);
 
-						uvBuffer.Add(new float2(0, 0));
-						uvBuffer.Add(new float2(w, 0));
-						uvBuffer.Add(new float2(0, h));
-						uvBuffer.Add(new float2(w, h));
-					}
-			}
+		uvBuffer.Add(new float2(0, 0));
+		uvBuffer.Add(new float2(w, 0));
+		uvBuffer.Add(new float2(0, h));
+		uvBuffer.Add(new float2(w, h));
+	}
+}

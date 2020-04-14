@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
 public class ChunkLoader : MonoBehaviour {
-	public int radius;
-	public int preloadRadius;
-
-	public WorldData worldData;
+	/*
 
 	//public BlockLibrary blockLibrary;
 	public GameObject chunkPrefab;
@@ -19,31 +17,25 @@ public class ChunkLoader : MonoBehaviour {
 
 	Dictionary<string, Chunk> chunks;
 	Queue<Tuple<int, int>> loadingBacklog;
-	int lastChunkX, lastChunkY;
+	int lastChunkX, lastChunkY;*/
 
 	EntityManager entityManager;
 	EntityArchetype chunkArchetype;
+	
+	public int radius;
+	public int preloadRadius;
+	public WorldData worldData;
 
 	public Material opaqueMaterial;
 
 	void Start() {
-		/*chunks = new Dictionary<string, Chunk>();
-		loadingBacklog = new Queue<Tuple<int, int>>();
+		/*loadingBacklog = new Queue<Tuple<int, int>>();
 
 		blockLibrary.Init();
 		//worldData.load();
 
 		float backlogSize = preloadRadius * preloadRadius * 4f;
 		float numLoaded = 0;
-
-		for (int x = -preloadRadius; x < preloadRadius; x++) {
-			for (int y = -preloadRadius; y < preloadRadius; y++) {
-				CreateNewChunk(x, y);
-				numLoaded++;
-			}
-
-			Debug.Log((numLoaded / backlogSize) * 100 + "%");
-		}
 
 		UpdateLoadingChunks();*/
 
@@ -89,55 +81,53 @@ public class ChunkLoader : MonoBehaviour {
 			materialTop = 0
 		});
 
-		entityManager.CreateEntity(typeof(WorldData));
-		entityManager.CreateEntityQuery(typeof(WorldData))
-			.SetSingleton(new WorldData {
+		entityManager.SetName(entityManager.CreateEntity(typeof(WorldData)), "WorldData");
+		var worldDataQuery = entityManager.CreateEntityQuery(typeof(WorldData));
+		worldDataQuery.SetSingleton(new WorldData {
 				CHUNK_SIZE = 16,
 				WORLD_HEIGHT = 128
 			});
+		worldData = worldDataQuery.GetSingleton<WorldData>();
+		
 
 		chunkArchetype = entityManager.CreateArchetype(
 			typeof(ChunkData),
 			typeof(Translation),
-			typeof(Rotation),
 			typeof(RenderMesh),
 			typeof(RenderBounds),
-			typeof(LocalToWorld)
+			typeof(LocalToWorld),
+			typeof(ChunkSubMeshData),
+			typeof(VertexBufferElement),
+			typeof(NormalBufferElement),
+			typeof(UVBufferElement),
+			typeof(IndexBufferElement),
+			typeof(WorldBlockData),
+			typeof(ChunkDirtyTag),
+			typeof(ChunkNotGeneratedTag)
 		);
 
+		for (int x = -preloadRadius; x < preloadRadius; x++)
+			for (int y = -preloadRadius; y < preloadRadius; y++)
+				CreateNewChunk(x, y);
+	}
+
+	void CreateNewChunk(int x, int y) {
 		var entity = entityManager.CreateEntity(chunkArchetype);
+		entityManager.SetName(entity, $"Chunk {x}, {y}");
+		
 		entityManager.SetComponentData(entity, new ChunkData {
-			x = 0, y = 0
+			x = x, y = y
+		});
+		entityManager.SetComponentData(entity, new Translation {
+			Value = new float3(x * worldData.CHUNK_SIZE, 0, y * worldData.CHUNK_SIZE)
 		});
 		entityManager.SetSharedComponentData(entity, new RenderMesh() {
 			mesh = new Mesh(),
 			material = opaqueMaterial
 		});
-
-		entityManager.AddBuffer<ChunkSubMeshData>(entity);
-		entityManager.AddBuffer<VertexBufferElement>(entity);
-		entityManager.AddBuffer<NormalBufferElement>(entity);
-		entityManager.AddBuffer<UVBufferElement>(entity);
-		entityManager.AddBuffer<IndexBufferElement>(entity);
-		entityManager.AddBuffer<WorldBlockData>(entity);
-
-		entityManager.AddComponentData(entity, new ChunkDirtyTag());
-		entityManager.AddComponentData(entity, new ChunkNotGeneratedTag());
 	}
 
-	/*Chunk CreateNewChunk(int x, int y) {
-		GameObject chunkGameObject = Instantiate(chunkPrefab, transform);
-
-		Chunk chunk = chunkGameObject.GetComponent<Chunk>();
-		chunk.Init(x, y, worldData, blockLibrary);
-
-		chunkGameObject.name = WorldData.GetChunkKey(x, y);
-		chunks.Add(chunkGameObject.name, chunk);
-
-		return chunk;
-	}
-
-	void UpdateLoadingChunks() {
+	/*void UpdateLoadingChunks() {
 		var loadingBacklogList = new List<Tuple<int, int>>();
 
 		for (int x = lastChunkX - radius; x < lastChunkX + radius; x++)

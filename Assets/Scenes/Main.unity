@@ -716,13 +716,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 3
-  preloadRadius: 0
-  worldData: {fileID: 11400000, guid: 0d871b4bed9fb7d4bbc96c59ad98a85d, type: 2}
-  chunkPrefab: {fileID: 813285466925429110, guid: 0b9ee82f12fe6bc4d8e00ce4ca05c605,
-    type: 3}
-  player: {fileID: 1222851259}
+  preloadRadius: 4
   opaqueMaterial: {fileID: 2100000, guid: a5c413ba21a3767498cabb87ec630dd5, type: 2}
-  cubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1464034128
 Transform:
   m_ObjectHideFlags: 0

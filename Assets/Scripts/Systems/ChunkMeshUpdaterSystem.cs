@@ -13,10 +13,9 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 		var dirtyChunkQuery = GetEntityQuery(typeof(ChunkApplyMeshingTag));
 		var dirtyChunks = dirtyChunkQuery.ToEntityArray(Allocator.TempJob);
 
-		//Debug.Log("Pre : " + dirtyChunks.Length);
 		foreach (Entity dirtyChunk in dirtyChunks) {
 			RenderMesh renderMesh = EntityManager.GetSharedComponentData<RenderMesh>(dirtyChunk);
-			var mesh = renderMesh.mesh;
+			Mesh mesh = renderMesh.mesh;
 
 			mesh.Clear();
 			//mesh.subMeshCount = blockLibrary.GetTypeCount();
@@ -36,9 +35,6 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 				indices.Dispose();
 			}
 
-			renderMesh.mesh = mesh;
-			renderMesh.material = opaqueMaterial;
-			EntityManager.SetSharedComponentData(dirtyChunk, renderMesh);
 			EntityManager.SetComponentData(dirtyChunk, new RenderBounds {
 				Value = mesh.bounds.ToAABB()
 			});

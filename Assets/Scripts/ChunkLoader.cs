@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.Entities;
-using Unity.Jobs;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
@@ -10,23 +6,22 @@ using UnityEngine;
 
 public class ChunkLoader : MonoBehaviour {
 	/*
-
 	//public BlockLibrary blockLibrary;
 	public GameObject chunkPrefab;
-	public Transform player;
 
 	Dictionary<string, Chunk> chunks;
 	Queue<Tuple<int, int>> loadingBacklog;
-	int lastChunkX, lastChunkY;*/
-
-	EntityManager entityManager;
-	EntityArchetype chunkArchetype;
+	*/
 	
 	public int radius;
 	public int preloadRadius;
 	public WorldData worldData;
-
 	public Material opaqueMaterial;
+	public Transform player;
+
+	EntityManager entityManager;
+	EntityArchetype chunkArchetype;
+	int lastChunkX, lastChunkY;
 
 	void Start() {
 		/*loadingBacklog = new Queue<Tuple<int, int>>();
@@ -62,12 +57,6 @@ public class ChunkLoader : MonoBehaviour {
 			blockMaterial = blockMaterial
 		});
 
-		//create BlockTypeMaterial entity
-		/*var blockTypeMaterials = entityManager.CreateEntity();
-		var blockTypeMaterialBuffer = entityManager.AddBuffer<BlockTypeMaterial>(blockTypeMaterials);
-		for (int i = 0; i < 6; i++)
-			blockTypeMaterialBuffer.Add(opaqueIndex);*/
-
 		//create BlockTypeData buffer
 		var blockTypes = entityManager.AddBuffer<BlockTypeData>(blockLibrary);
 		blockTypes.Add(new BlockTypeData {
@@ -83,10 +72,7 @@ public class ChunkLoader : MonoBehaviour {
 
 		entityManager.SetName(entityManager.CreateEntity(typeof(WorldData)), "WorldData");
 		var worldDataQuery = entityManager.CreateEntityQuery(typeof(WorldData));
-		worldDataQuery.SetSingleton(new WorldData {
-				CHUNK_SIZE = 16,
-				WORLD_HEIGHT = 128
-			});
+		worldDataQuery.SetSingleton(new WorldData());
 		worldData = worldDataQuery.GetSingleton<WorldData>();
 		
 
@@ -119,7 +105,7 @@ public class ChunkLoader : MonoBehaviour {
 			x = x, y = y
 		});
 		entityManager.SetComponentData(entity, new Translation {
-			Value = new float3(x * worldData.CHUNK_SIZE, 0, y * worldData.CHUNK_SIZE)
+			Value = new float3(x * WorldData.CHUNK_SIZE, 0, y * WorldData.CHUNK_SIZE)
 		});
 		entityManager.SetSharedComponentData(entity, new RenderMesh() {
 			mesh = new Mesh(),
@@ -127,8 +113,10 @@ public class ChunkLoader : MonoBehaviour {
 		});
 	}
 
-	/*void UpdateLoadingChunks() {
-		var loadingBacklogList = new List<Tuple<int, int>>();
+	void UpdateLoadingChunks() {
+		var chunkQuery = entityManager.CreateEntityQuery(ComponentType.ReadOnly<ChunkData>());
+
+		/*var loadingBacklogList = new List<Tuple<int, int>>();
 
 		for (int x = lastChunkX - radius; x < lastChunkX + radius; x++)
 		for (int y = lastChunkY - radius; y < lastChunkY + radius; y++) {
@@ -142,11 +130,11 @@ public class ChunkLoader : MonoBehaviour {
 		if (loadingBacklogList.Count == 0) return;
 
 		loadingBacklogList.Sort();
-		loadingBacklog = new Queue<Tuple<int, int>>(loadingBacklogList);
+		loadingBacklog = new Queue<Tuple<int, int>>(loadingBacklogList);*/
 	}
 
 	//TODO use distance from player's last pos
-	static int CompareLoadingChunks(Tuple<int, int> a, Tuple<int, int> b)
+	/*static int CompareLoadingChunks(Tuple<int, int> a, Tuple<int, int> b)
 		=> a.Item1 * a.Item1 + a.Item2 * a.Item2 - b.Item1 * b.Item1 + b.Item2 * b.Item2;
 
 	void Update() {
@@ -166,17 +154,10 @@ public class ChunkLoader : MonoBehaviour {
 		var jobHandle = job.Schedule(chunkDataArray.Length, 1);
 		jobHandle.Complete();
 		chunkDataArray.Dispose();
-	}
+	}*/
 
 	void UpdatePlayerChunk() {
-		var pos = player.position;
-		int chunkX = Mathf.FloorToInt(pos.x / WorldData.CHUNK_SIZE);
-		int chunkY = Mathf.FloorToInt(pos.z / WorldData.CHUNK_SIZE);
-
-		if (chunkX == lastChunkX && chunkY == lastChunkY) return;
-
-		lastChunkX = chunkX;
-		lastChunkY = chunkY;
+		
 		UpdateLoadingChunks();
-	}*/
+	}
 }

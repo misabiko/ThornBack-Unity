@@ -24,12 +24,11 @@ public class WorldData : ScriptableObject {
 }*/
 
 using Unity.Entities;
-using Unity.Mathematics;
 
 //TODO make those const/defined
 public struct WorldData : IComponentData {
-	public int CHUNK_SIZE;
-	public int WORLD_HEIGHT;
+	public const int CHUNK_SIZE = 16;
+	public const int WORLD_HEIGHT = 128;
 }
 
 [InternalBufferCapacity(0)]

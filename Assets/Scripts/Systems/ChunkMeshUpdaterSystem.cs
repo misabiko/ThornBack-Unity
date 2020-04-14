@@ -16,22 +16,23 @@ public class ChunkMeshUpdaterSystem : SystemBase {
 		foreach (Entity dirtyChunk in dirtyChunks) {
 			RenderMesh renderMesh = EntityManager.GetSharedComponentData<RenderMesh>(dirtyChunk);
 			Mesh mesh = renderMesh.mesh;
+			
+			var meshData = EntityManager.GetBuffer<ChunkSubMeshData>(dirtyChunk);
 
 			mesh.Clear();
-			//mesh.subMeshCount = blockLibrary.GetTypeCount();
-			mesh.subMeshCount = 8;
+			mesh.subMeshCount = meshData.Length;
 			
 			mesh.SetVertices(EntityManager.GetBuffer<VertexBufferElement>(dirtyChunk).AsNativeArray());
 			mesh.SetNormals(EntityManager.GetBuffer<NormalBufferElement>(dirtyChunk).AsNativeArray());
 			mesh.SetUVs(0, EntityManager.GetBuffer<UVBufferElement>(dirtyChunk).AsNativeArray());
 
 			var indexBuffer = EntityManager.GetBuffer<IndexBufferElement>(dirtyChunk);
-			foreach (ChunkSubMeshData subMeshData in EntityManager.GetBuffer<ChunkSubMeshData>(dirtyChunk)) {
-				var indices = new NativeArray<int>(subMeshData.indexLength - subMeshData.indexOffset, Allocator.Temp);
-				for (int i = 0; i < subMeshData.indexLength - subMeshData.indexOffset; i++)
-					indices[i] = indexBuffer[subMeshData.indexOffset + i];
-				
-				mesh.SetIndices(indices, MeshTopology.Triangles, subMeshData.blockType);
+			for (int i = 0; i < meshData.Length; i++) {
+				var indices = new NativeArray<int>(meshData[i].indexLength - meshData[i].indexOffset, Allocator.Temp);
+				for (int j = 0; j < meshData[i].indexLength - meshData[i].indexOffset; j++)
+					indices[j] = indexBuffer[meshData[i].indexOffset + j];
+
+				mesh.SetIndices(indices, MeshTopology.Triangles, i);
 				indices.Dispose();
 			}
 

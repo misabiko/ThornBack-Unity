@@ -4,32 +4,27 @@ using Unity.Mathematics;
 public class WorldGenSystem : SystemBase {
 	EndSimulationEntityCommandBufferSystem endSimulationEcbSystem;
 
-	protected override void OnCreate() {
-		endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-
-		RequireSingletonForUpdate<WorldData>();
-	}
+	protected override void OnCreate()
+		=> endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
 
 	protected override void OnUpdate() {
 		EntityCommandBuffer ecb = endSimulationEcbSystem.CreateCommandBuffer();
 		
-		var worldData = GetSingleton<WorldData>();
-
 		Entities
 			.WithAll<ChunkNotGeneratedTag>()
 			.ForEach((
 				Entity e, int entityInQueryIndex,
 				ref DynamicBuffer<WorldBlockData> worldBlockBuffer, in ChunkData chunkData
 			) => {
-				int chunkVolume = worldData.CHUNK_SIZE * worldData.CHUNK_SIZE * worldData.WORLD_HEIGHT;
+				int chunkVolume = WorldData.CHUNK_SIZE * WorldData.CHUNK_SIZE * WorldData.WORLD_HEIGHT;
 				for (int i = 0; i < chunkVolume; i++)
 					worldBlockBuffer.Add(new WorldBlockData());
 
-				int chunkWorldX = chunkData.x * worldData.CHUNK_SIZE;
-				int chunkWorldY = chunkData.y * worldData.CHUNK_SIZE;
+				int chunkWorldX = chunkData.x * WorldData.CHUNK_SIZE;
+				int chunkWorldY = chunkData.y * WorldData.CHUNK_SIZE;
 
-				for (int x = 0; x < worldData.CHUNK_SIZE; x++)
-				for (int z = 0; z < worldData.CHUNK_SIZE; z++) {
+				for (int x = 0; x < WorldData.CHUNK_SIZE; x++)
+				for (int z = 0; z < WorldData.CHUNK_SIZE; z++) {
 					float2 n = new float2((x + chunkWorldX) / 5.0f, (z + chunkWorldY) / 5.0f) / 20 - new float2(0.5f, 0.5f);
 					
 					/*float e1 = Ease((0.5f + noise.pnoise(7.567f * n, new float2(1, 1)) / 2) + 0.02f, -8.57f);
@@ -40,16 +35,16 @@ public class WorldGenSystem : SystemBase {
 
 					float e0 = e2 + e3;
 					
-					int y = (int)math.floor(math.clamp((e0 + 3) * 15.3f, 0, worldData.WORLD_HEIGHT - 1));*/
+					int y = (int)math.floor(math.clamp((e0 + 3) * 15.3f, 0, WorldData.WORLD_HEIGHT - 1));*/
 					float elevation = noise.snoise(3f * n);
 					
-					int y = (int)math.floor(math.clamp(elevation * 10f + 50, 0, worldData.WORLD_HEIGHT - 1));
+					int y = (int)math.floor(math.clamp(elevation * 10f + 50, 0, WorldData.WORLD_HEIGHT - 1));
 
 					//if (x % 2 == 0 && z % 2 == 0) {
-					SetBlock(worldBlockBuffer, worldData, x, y, z, 4);
+					SetBlock(worldBlockBuffer, x, y, z, 4);
 
 					for (int j = 0; j < y; j++)
-						SetBlock(worldBlockBuffer, worldData, x, j, z, 1);
+						SetBlock(worldBlockBuffer, x, j, z, 1);
 					//}
 				}
 
@@ -82,6 +77,6 @@ public class WorldGenSystem : SystemBase {
 			return 0; // no ease (raw)
 	}
 
-	static void SetBlock(DynamicBuffer<WorldBlockData> worldBlockBuffer, WorldData worldData, int x, int y, int z, int type)
-		=> worldBlockBuffer[x + worldData.CHUNK_SIZE * y + worldData.CHUNK_SIZE * worldData.WORLD_HEIGHT * z] = new WorldBlockData {type = type};
+	static void SetBlock(DynamicBuffer<WorldBlockData> worldBlockBuffer, int x, int y, int z, int type)
+		=> worldBlockBuffer[x + WorldData.CHUNK_SIZE * y + WorldData.CHUNK_SIZE * WorldData.WORLD_HEIGHT * z] = new WorldBlockData {type = type};
 }

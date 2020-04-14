@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using Unity.Mathematics;
 
 public class PlayerChunkSystem : SystemBase {
 	Entity player;
@@ -15,14 +16,16 @@ public class PlayerChunkSystem : SystemBase {
 	}
 
 	protected override void OnUpdate() {
-		/*var playerComponent = GetComponent<PlayerComponent>(player);
-		var pos = playerTransform.value.position;
-		int chunkX = math.floor(pos.x / worldData.CHUNK_SIZE);
-		int chunkY = math.floor(pos.z / worldData.CHUNK_SIZE);
+		float3 pos = playerTransform.value.position;
+		
+		Entities.ForEach((ref PlayerComponent playerComponent) => {
+			int chunkX = (int) math.floor(pos.x / WorldData.CHUNK_SIZE);
+			int chunkY = (int) math.floor(pos.z / WorldData.CHUNK_SIZE);
 
-		if (chunkX == lastChunkX && chunkY == lastChunkY) return;
+			if (chunkX == playerComponent.chunkX && chunkY == playerComponent.chunkY) return;
 
-		lastChunkX = chunkX;
-		lastChunkY = chunkY;*/
+			playerComponent.chunkX = chunkX;
+			playerComponent.chunkY = chunkY;
+		}).ScheduleParallel();
 	}
 }

@@ -6,10 +6,6 @@ using UnityEngine;
 
 public class ChunkLoader : MonoBehaviour {
 	/*
-	//public BlockLibrary blockLibrary;
-	public GameObject chunkPrefab;
-
-	Dictionary<string, Chunk> chunks;
 	Queue<Tuple<int, int>> loadingBacklog;
 	*/
 	
@@ -74,63 +70,13 @@ public class ChunkLoader : MonoBehaviour {
 		var worldDataQuery = entityManager.CreateEntityQuery(typeof(WorldData));
 		worldDataQuery.SetSingleton(new WorldData());
 		worldData = worldDataQuery.GetSingleton<WorldData>();
-		
 
-		chunkArchetype = entityManager.CreateArchetype(
-			typeof(ChunkData),
-			typeof(Translation),
-			typeof(RenderMesh),
-			typeof(RenderBounds),
-			typeof(LocalToWorld),
-			typeof(ChunkSubMeshData),
-			typeof(VertexBufferElement),
-			typeof(NormalBufferElement),
-			typeof(UVBufferElement),
-			typeof(IndexBufferElement),
-			typeof(WorldBlockData),
-			typeof(ChunkDirtyTag),
-			typeof(ChunkNotGeneratedTag)
-		);
-
+		var loadingQueueQuery = entityManager.CreateEntityQuery(typeof(ChunkLoaderQueueElement));
+		var loadingBuffer = entityManager.GetBuffer<ChunkLoaderQueueElement>(loadingQueueQuery.GetSingletonEntity());
 		for (int x = -preloadRadius; x < preloadRadius; x++)
-			for (int y = -preloadRadius; y < preloadRadius; y++)
-				CreateNewChunk(x, y);
-	}
-
-	void CreateNewChunk(int x, int y) {
-		var entity = entityManager.CreateEntity(chunkArchetype);
-		entityManager.SetName(entity, $"Chunk {x}, {y}");
-		
-		entityManager.SetComponentData(entity, new ChunkData {
-			x = x, y = y
-		});
-		entityManager.SetComponentData(entity, new Translation {
-			Value = new float3(x * WorldData.CHUNK_SIZE, 0, y * WorldData.CHUNK_SIZE)
-		});
-		entityManager.SetSharedComponentData(entity, new RenderMesh() {
-			mesh = new Mesh(),
-			material = opaqueMaterial
-		});
-	}
-
-	void UpdateLoadingChunks() {
-		var chunkQuery = entityManager.CreateEntityQuery(ComponentType.ReadOnly<ChunkData>());
-
-		/*var loadingBacklogList = new List<Tuple<int, int>>();
-
-		for (int x = lastChunkX - radius; x < lastChunkX + radius; x++)
-		for (int y = lastChunkY - radius; y < lastChunkY + radius; y++) {
-			if (
-				Mathf.Pow(x - lastChunkX, 2) + Mathf.Pow(y - lastChunkY, 2) <= radius * radius &&
-				!chunks.ContainsKey(WorldData.GetChunkKey(x, y))
-			)
-				loadingBacklogList.Add(Tuple.Create(x, y));
-		}
-
-		if (loadingBacklogList.Count == 0) return;
-
-		loadingBacklogList.Sort();
-		loadingBacklog = new Queue<Tuple<int, int>>(loadingBacklogList);*/
+		for (int y = -preloadRadius; y < preloadRadius; y++)
+			loadingBuffer.Add(new int2(x, y));
+		loadingQueueQuery.Dispose();
 	}
 
 	//TODO use distance from player's last pos
@@ -155,9 +101,4 @@ public class ChunkLoader : MonoBehaviour {
 		jobHandle.Complete();
 		chunkDataArray.Dispose();
 	}*/
-
-	void UpdatePlayerChunk() {
-		
-		UpdateLoadingChunks();
-	}
 }

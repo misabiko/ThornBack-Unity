@@ -1,6 +1,18 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 
+/*public struct ChunkLoaderSharedData : ISharedComponentData {
+	public Material opaqueMaterial;
+}*/
+
+public struct ChunkLoaderQueueElement : IBufferElementData {
+	public int2 coords;
+	
+	public static implicit operator int2(ChunkLoaderQueueElement e) => e.coords;
+
+	public static implicit operator ChunkLoaderQueueElement(int2 e) => new ChunkLoaderQueueElement { coords = e };
+}
+
 public struct ChunkData : IComponentData {
 	public int x, y;
 }

@@ -6,10 +6,6 @@ using UnityEngine;
 
 public class ChunkMeshUpdaterSystem : SystemBase {
 	protected override void OnUpdate() {
-		var blockLibrary = GetSingletonEntity<BlockLibraryData>();
-		var blockMaterial = EntityManager.GetBuffer<BlockMaterialElement>(blockLibrary)[0].blockMaterial;
-		var opaqueMaterial = EntityManager.GetSharedComponentData<BlockMaterial>(blockMaterial);
-		
 		var dirtyChunkQuery = GetEntityQuery(typeof(ChunkApplyMeshingTag));
 		var dirtyChunks = dirtyChunkQuery.ToEntityArray(Allocator.TempJob);
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\misabiko\.Rider2019.3\config\scratches" t="IncludeRecursive" />
-    <e p="C:\Users\misabiko\.Rider2019.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\misabiko\.Rider2019.3\system\resharper-host\Local\Transient\ReSharperHost\v193\SolutionCaches\_ThornBack.1859854253.00" t="ExcludeRecursive" />
+    <e p="C:\Users\misabiko\AppData\Local\JetBrains\Rider2020.1\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\misabiko\AppData\Local\JetBrains\Rider2020.1\resharper-host\Local\Transient\ReSharperHost\v201\SolutionCaches\_ThornBack.1859854253.00" t="ExcludeRecursive" />
+    <e p="C:\Users\misabiko\AppData\Roaming\JetBrains\Rider2020.1\scratches" t="IncludeRecursive" />
     <e p="C:\Users\misabiko\Documents\Coding\UnityProjects\ThornBack" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor-firstpass.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
@@ -33,6 +33,7 @@
           <e p="PlayerMovement.cs" t="Include" />
           <e p="StayAABB.cs" t="Include" />
           <e p="Systems" t="Include">
+            <e p="ChunkFactorySystem.cs" t="Include" />
             <e p="ChunkMeshingSystem.cs" t="Include" />
             <e p="ChunkMeshUpdaterSystem.cs" t="Include" />
             <e p="PlayerChunkSystem.cs" t="Include" />

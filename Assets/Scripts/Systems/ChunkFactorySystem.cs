@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
@@ -29,6 +30,8 @@ public class ChunkFactorySystem : SystemBase {
 			typeof(UVBufferElement),
 			typeof(IndexBufferElement),
 			typeof(WorldBlockData),
+			typeof(ChunkMeshingDataElement),
+			typeof(PhysicsCollider),
 			typeof(ChunkDirtyTag),
 			typeof(ChunkNotGeneratedTag)
 		);

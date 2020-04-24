@@ -2,6 +2,7 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 
 public class ChunkMeshingSystem : SystemBase {
 	enum Direction {
@@ -32,84 +33,131 @@ public class ChunkMeshingSystem : SystemBase {
 			.WithAll<ChunkDirtyTag>()
 			.WithNone<ChunkNotGeneratedTag>()
 			.ForEach((
-				Entity e, int entityInQueryIndex,
-				ref DynamicBuffer<ChunkSubMeshData> subMeshBuffer,
-				ref DynamicBuffer<VertexBufferElement> vertexBuffer,
-				ref DynamicBuffer<NormalBufferElement> normalBuffer,
-				ref DynamicBuffer<UVBufferElement> uvBuffer,
-				ref DynamicBuffer<IndexBufferElement> indexBuffer,
+				ref DynamicBuffer<ChunkMeshingDataElement> meshingData,
 				in DynamicBuffer<WorldBlockData> worldBlockBuffer
 			) => {
-				NativeArray<bool> voxelMask = new NativeArray<bool>(WorldData.CHUNK_SIZE * WorldData.WORLD_HEIGHT * WorldData.CHUNK_SIZE, Allocator.Temp);
-				
+				var voxelMask = new NativeArray<bool>(WorldData.CHUNK_SIZE * WorldData.WORLD_HEIGHT * WorldData.CHUNK_SIZE, Allocator.Temp);
+
 				for (int i = 0; i < voxelMask.Length; i++)
 					voxelMask[i] = false;
 
-				float3 pos, cubeSize;
 				for (int i = 0; i < WorldData.CHUNK_SIZE; i++)
 				for (int j = 0; j < WorldData.WORLD_HEIGHT; j++)
 				for (int k = 0; k < WorldData.CHUNK_SIZE; k++)
 					if (!voxelMask[Get3dIndex(i, j, k)] && GetBlockType(worldBlockBuffer, i, j, k) > 0) {
 						voxelMask[Get3dIndex(i, j, k)] = true;
-						cubeSize = new float3(1);
+						float3 boxSize = new float3(1);
 
 						for (int di = 1; di < WorldData.CHUNK_SIZE - i; di++) {
 							if (voxelMask[Get3dIndex(i + di, j, k)] || (GetBlockType(worldBlockBuffer, i + di, j, k) != GetBlockType(worldBlockBuffer, i, j, k))) {
-								cubeSize.x += di - 1;
+								boxSize.x += di - 1;
 								goto fullbreak1;
 							}
 							else
 								voxelMask[Get3dIndex(i + di, j, k)] = true;
 						}
 
-						cubeSize.x += WorldData.CHUNK_SIZE - i - 1; //This is skipped if goto fullbreak1
+						boxSize.x += WorldData.CHUNK_SIZE - i - 1; //This is skipped if goto fullbreak1
 						fullbreak1:
 
 						for (int dk = 1; dk < WorldData.CHUNK_SIZE - k; dk++) {
-							for (int di = 0; di < cubeSize.x; di++)
+							for (int di = 0; di < boxSize.x; di++)
 								if (voxelMask[Get3dIndex(i + di, j, k + dk)] || (GetBlockType(worldBlockBuffer, i + di, j, k + dk) != GetBlockType(worldBlockBuffer, i, j, k))) {
-									cubeSize.z += dk - 1;
+									boxSize.z += dk - 1;
 									goto fullbreak2;
 								}
 
-							for (int di = 0; di < cubeSize.x; di++)
+							for (int di = 0; di < boxSize.x; di++)
 								voxelMask[Get3dIndex(i + di, j, k + dk)] = true;
 						}
 
-						cubeSize.z += WorldData.CHUNK_SIZE - k - 1; //This is skipped if goto fullbreak2
+						boxSize.z += WorldData.CHUNK_SIZE - k - 1; //This is skipped if goto fullbreak2
 						fullbreak2:
 
 						for (int dj = 1; dj < WorldData.WORLD_HEIGHT - j; dj++) {
-							for (int dk = 0; dk < cubeSize.z; dk++)
-							for (int di = 0; di < cubeSize.x; di++)
+							for (int dk = 0; dk < boxSize.z; dk++)
+							for (int di = 0; di < boxSize.x; di++)
 								if (voxelMask[Get3dIndex(i + di, j + dj, k + dk)] || (GetBlockType(worldBlockBuffer, i + di, j + dj, k + dk) != GetBlockType(worldBlockBuffer, i, j, k))) {
-									cubeSize.y += dj - 1;
+									boxSize.y += dj - 1;
 									goto fullbreak3;
 								}
 
-							for (int dk = 0; dk < cubeSize.z; dk++)
-							for (int di = 0; di < cubeSize.x; di++)
+							for (int dk = 0; dk < boxSize.z; dk++)
+							for (int di = 0; di < boxSize.x; di++)
 								voxelMask[Get3dIndex(i + di, j + dj, k + dk)] = true;
 						}
 
-						cubeSize.y += WorldData.WORLD_HEIGHT - j - 1; //This is skipped if goto fullbreak3
+						boxSize.y += WorldData.WORLD_HEIGHT - j - 1; //This is skipped if goto fullbreak3
 						fullbreak3:
 
-						pos = new float3(i, j, k);
-
-						/*var box = gameObject.AddComponent<BoxCollider>();
-						box.size = cubeSize;
-						box.center = pos + cubeSize * 0.5f;*/
-
-						AddBoxSurfaces(pos, cubeSize, blockTypes[0], subMeshBuffer, vertexBuffer, normalBuffer, uvBuffer, indexBuffer);
+						meshingData.Add(new ChunkMeshingDataElement {
+							pos = new float3(i, j, k),
+							size = boxSize
+						});
 					}
-
-				ecb.RemoveComponent<ChunkDirtyTag>(entityInQueryIndex, e);
-				ecb.AddComponent<ChunkApplyMeshingTag>(entityInQueryIndex, e);
 
 				voxelMask.Dispose();
 			})
+			.ScheduleParallel();
+
+		Entities
+			.WithAll<ChunkDirtyTag>()
+			.WithNone<ChunkNotGeneratedTag>()
+			.ForEach((
+				ref DynamicBuffer<ChunkSubMeshData> subMeshBuffer,
+				ref DynamicBuffer<VertexBufferElement> vertexBuffer,
+				ref DynamicBuffer<NormalBufferElement> normalBuffer,
+				ref DynamicBuffer<UVBufferElement> uvBuffer,
+				ref DynamicBuffer<IndexBufferElement> indexBuffer,
+				in DynamicBuffer<ChunkMeshingDataElement> meshingData
+			) => {
+				for (int i = 0; i < meshingData.Length; i++)
+					AddBoxSurfaces(
+						meshingData[i].pos, meshingData[i].size, blockTypes[0],
+						subMeshBuffer,
+						vertexBuffer,
+						normalBuffer,
+						uvBuffer,
+						indexBuffer
+					);
+			})
 			.WithDeallocateOnJobCompletion(blockTypes)
+			.ScheduleParallel();
+
+		Entities
+			.WithAll<ChunkDirtyTag>()
+			.WithNone<ChunkNotGeneratedTag>()
+			.ForEach((
+				ref PhysicsCollider collider,
+				in DynamicBuffer<ChunkMeshingDataElement> meshingData
+				) => {
+				var shapes = new NativeList<CompoundCollider.ColliderBlobInstance>(Allocator.Temp);
+				
+				for (int i = 0; i < meshingData.Length; i++)
+					shapes.Add(new CompoundCollider.ColliderBlobInstance {
+						CompoundFromChild = new RigidTransform(quaternion.identity, meshingData[i].pos + meshingData[i].size * 0.5f),
+						Collider = BoxCollider.Create(new BoxGeometry {
+							Center = float3.zero,
+							Orientation = quaternion.identity,
+							Size = meshingData[i].size,
+							BevelRadius = 0.5f
+						})
+					});
+
+				collider.Value = CompoundCollider.Create(shapes);
+				shapes.Dispose();
+			})
+			.ScheduleParallel();
+
+		Entities
+			.WithAll<ChunkDirtyTag>()
+			.WithNone<ChunkNotGeneratedTag>()
+			.ForEach((Entity e, int entityInQueryIndex, ref DynamicBuffer<ChunkMeshingDataElement> meshingData) => {
+				meshingData.Clear();
+
+				ecb.RemoveComponent<ChunkDirtyTag>(entityInQueryIndex, e);
+				ecb.AddComponent<ChunkApplyMeshingTag>(entityInQueryIndex, e);
+			})
 			.ScheduleParallel();
 
 		endSimulationEcbSystem.AddJobHandleForProducer(Dependency);

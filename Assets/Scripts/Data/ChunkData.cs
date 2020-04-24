@@ -1,10 +1,6 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 
-/*public struct ChunkLoaderSharedData : ISharedComponentData {
-	public Material opaqueMaterial;
-}*/
-
 public struct ChunkLoaderQueueElement : IBufferElementData {
 	public int2 coords;
 	
@@ -17,10 +13,10 @@ public struct ChunkData : IComponentData {
 	public int x, y;
 }
 
-/*public struct ChunkMeshData : IComponentData {
-	public DynamicBuffer<ChunkSubMeshData> value;
-	public int boo;
-}*/
+public struct ChunkMeshingDataElement : IBufferElementData {
+	public float3 pos;
+	public float3 size;
+}
 
 public struct ChunkSubMeshData : IBufferElementData {
 	public int blockType;

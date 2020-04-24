@@ -37,61 +37,59 @@ public class ChunkMeshingSystem : SystemBase {
 				in DynamicBuffer<WorldBlockData> worldBlockBuffer
 			) => {
 				var voxelMask = new NativeArray<bool>(WorldData.CHUNK_SIZE * WorldData.WORLD_HEIGHT * WorldData.CHUNK_SIZE, Allocator.Temp);
+				int3 pos;
+				
+				for (pos.x = 0; pos.x < WorldData.CHUNK_SIZE; pos.x++)
+				for (pos.y = 0; pos.y < WorldData.WORLD_HEIGHT; pos.y++)
+				for (pos.z = 0; pos.z < WorldData.CHUNK_SIZE; pos.z++)
+					if (!voxelMask[Get3dIndex(pos)] && worldBlockBuffer[Get3dIndex(pos)].type > 0) {
+						voxelMask[Get3dIndex(pos)] = true;
+						int3 boxSize = new int3(1);
 
-				for (int i = 0; i < voxelMask.Length; i++)
-					voxelMask[i] = false;
-
-				for (int i = 0; i < WorldData.CHUNK_SIZE; i++)
-				for (int j = 0; j < WorldData.WORLD_HEIGHT; j++)
-				for (int k = 0; k < WorldData.CHUNK_SIZE; k++)
-					if (!voxelMask[Get3dIndex(i, j, k)] && GetBlockType(worldBlockBuffer, i, j, k) > 0) {
-						voxelMask[Get3dIndex(i, j, k)] = true;
-						float3 boxSize = new float3(1);
-
-						for (int di = 1; di < WorldData.CHUNK_SIZE - i; di++) {
-							if (voxelMask[Get3dIndex(i + di, j, k)] || (GetBlockType(worldBlockBuffer, i + di, j, k) != GetBlockType(worldBlockBuffer, i, j, k))) {
-								boxSize.x += di - 1;
+						for (int3 d = new int3(1, 0, 0); d.x < WorldData.CHUNK_SIZE - pos.x; d.x++) {
+							if (voxelMask[Get3dIndex(pos + d)] || worldBlockBuffer[Get3dIndex(pos + d)].type != worldBlockBuffer[Get3dIndex(pos)].type) {
+								boxSize.x += d.x - 1;
 								goto fullbreak1;
 							}
-							else
-								voxelMask[Get3dIndex(i + di, j, k)] = true;
+
+							voxelMask[Get3dIndex(pos + d)] = true;
 						}
 
-						boxSize.x += WorldData.CHUNK_SIZE - i - 1; //This is skipped if goto fullbreak1
+						boxSize.x += WorldData.CHUNK_SIZE - pos.x - 1; //This is skipped if goto fullbreak1
 						fullbreak1:
 
-						for (int dk = 1; dk < WorldData.CHUNK_SIZE - k; dk++) {
-							for (int di = 0; di < boxSize.x; di++)
-								if (voxelMask[Get3dIndex(i + di, j, k + dk)] || (GetBlockType(worldBlockBuffer, i + di, j, k + dk) != GetBlockType(worldBlockBuffer, i, j, k))) {
-									boxSize.z += dk - 1;
+						for (int3 d = new int3(0, 0, 1); d.z < WorldData.CHUNK_SIZE - pos.z; d.z++) {
+							for (d.x = 0; d.x < boxSize.x; d.x++)
+								if (voxelMask[Get3dIndex(pos + d)] || worldBlockBuffer[Get3dIndex(pos + d)].type != worldBlockBuffer[Get3dIndex(pos)].type) {
+									boxSize.z += d.z - 1;
 									goto fullbreak2;
 								}
 
-							for (int di = 0; di < boxSize.x; di++)
-								voxelMask[Get3dIndex(i + di, j, k + dk)] = true;
+							for (d.x = 0; d.x < boxSize.x; d.x++)
+								voxelMask[Get3dIndex(pos + d)] = true;
 						}
 
-						boxSize.z += WorldData.CHUNK_SIZE - k - 1; //This is skipped if goto fullbreak2
+						boxSize.z += WorldData.CHUNK_SIZE - pos.z - 1; //This is skipped if goto fullbreak2
 						fullbreak2:
 
-						for (int dj = 1; dj < WorldData.WORLD_HEIGHT - j; dj++) {
-							for (int dk = 0; dk < boxSize.z; dk++)
-							for (int di = 0; di < boxSize.x; di++)
-								if (voxelMask[Get3dIndex(i + di, j + dj, k + dk)] || (GetBlockType(worldBlockBuffer, i + di, j + dj, k + dk) != GetBlockType(worldBlockBuffer, i, j, k))) {
-									boxSize.y += dj - 1;
+						for (int3 d = new int3(0, 1, 0); d.y < WorldData.WORLD_HEIGHT - pos.y; d.y++) {
+							for (d.z = 0; d.z < boxSize.z; d.z++)
+							for (d.x = 0; d.x < boxSize.x; d.x++)
+								if (voxelMask[Get3dIndex(pos + d)] || worldBlockBuffer[Get3dIndex(pos + d)].type != worldBlockBuffer[Get3dIndex(pos)].type) {
+									boxSize.y += d.y - 1;
 									goto fullbreak3;
 								}
 
-							for (int dk = 0; dk < boxSize.z; dk++)
-							for (int di = 0; di < boxSize.x; di++)
-								voxelMask[Get3dIndex(i + di, j + dj, k + dk)] = true;
+							for (d.z = 0; d.z < boxSize.z; d.z++)
+							for (d.x = 0; d.x < boxSize.x; d.x++)
+								voxelMask[Get3dIndex(pos + d)] = true;
 						}
 
-						boxSize.y += WorldData.WORLD_HEIGHT - j - 1; //This is skipped if goto fullbreak3
+						boxSize.y += WorldData.WORLD_HEIGHT - pos.y - 1; //This is skipped if goto fullbreak3
 						fullbreak3:
 
 						meshingData.Add(new ChunkMeshingDataElement {
-							pos = new float3(i, j, k),
+							pos = pos,
 							size = boxSize
 						});
 					}
@@ -163,11 +161,8 @@ public class ChunkMeshingSystem : SystemBase {
 		endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
 	}
 
-	static int Get3dIndex(int x, int y, int z)
-		=> x + WorldData.CHUNK_SIZE * y + WorldData.CHUNK_SIZE * WorldData.WORLD_HEIGHT * z;
-
-	static int GetBlockType(DynamicBuffer<WorldBlockData> worldBlockBuffer, int x, int y, int z)
-		=> worldBlockBuffer[Get3dIndex(x, y, z)].type;
+	static int Get3dIndex(int3 pos)
+		=> pos.x + WorldData.CHUNK_SIZE * pos.y + WorldData.CHUNK_SIZE * WorldData.WORLD_HEIGHT * pos.z;
 
 	static void AddBoxSurfaces(
 		float3 origin, float3 size, BlockTypeData type,

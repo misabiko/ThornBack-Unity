@@ -16,7 +16,7 @@ MonoBehaviour:
   sprintSpeed: 4
   accel: 100
   jumpForce: 3.5
-  deccel: 20
+  deccel: 0.5
   camSensitivityX: 0.25
   camSensitivityY: 0.25
   tweakSensitivity: 0.004

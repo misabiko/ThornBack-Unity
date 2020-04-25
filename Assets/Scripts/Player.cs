@@ -8,18 +8,8 @@ public class Player : MonoBehaviour {
 
 	void Awake() => cursorCaptured = true;
 
-	void Start() {
-		GetComponent<PlayerInput>().actions["Fire"].performed += (context) => CaptureCursor();
+	void Start() => GetComponent<PlayerInput>().actions["Fire"].performed += (context) => CaptureCursor();
 
-		var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-		var playerEntity = entityManager.CreateEntity(typeof(PlayerComponent), typeof(PlayerTransform));
-		entityManager.SetName(playerEntity, "Player");
-		entityManager.SetSharedComponentData(playerEntity, new PlayerTransform{value = transform});
-
-		var playerQuery = entityManager.CreateEntityQuery(typeof(PlayerComponent));
-		playerQuery.SetSingleton(new PlayerComponent {chunkX = 0, chunkY = 0});
-	}
-	
 	void OnApplicationFocus(bool hasFocus) {
 		if (hasFocus) 
 			CaptureCursor();

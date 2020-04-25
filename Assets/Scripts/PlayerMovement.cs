@@ -1,4 +1,9 @@
-﻿using UnityEngine;
+﻿using Unity.Collections;
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Physics;
+using Unity.Physics.Authoring;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour {
@@ -15,6 +20,19 @@ public class PlayerMovement : MonoBehaviour {
 		data = player.data;
 		rigidbody = GetComponent<Rigidbody>();
 		cam = GetComponentInChildren<CameraController>();
+	}
+
+	void Start() {
+		var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+		var entityQuery = entityManager.CreateEntityQuery(typeof(PlayerComponent));
+		var entities = entityQuery.ToEntityArray(Allocator.TempJob);
+		
+		/*var physicsMass = entityManager.GetComponentData<PhysicsMass>(entities[0]);
+		physicsMass.InverseInertia.x = 0;
+		physicsMass.InverseInertia.z = 0;
+		entityManager.SetComponentData(entities[0], physicsMass);*/
+
+		entities.Dispose();
 	}
 
 	void Update() => moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
@@ -67,7 +85,7 @@ public class PlayerMovement : MonoBehaviour {
 	public void OnJump(InputAction.CallbackContext ctx) {
 		if (!ctx.ReadValueAsButton() || !IsGrounded()) return;
 		
-		rigidbody.AddForce(data.jumpForce * Vector3.up, ForceMode.Impulse);
+		//rigidbody.AddForce(data.jumpForce * Vector3.up, ForceMode.Impulse);
 	}
 
 	bool IsGrounded() => true;

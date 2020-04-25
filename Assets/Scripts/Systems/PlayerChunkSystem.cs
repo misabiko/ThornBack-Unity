@@ -1,11 +1,10 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
+using Unity.Transforms;
 
 public class PlayerChunkSystem : SystemBase {
 	Entity player;
-	PlayerTransform playerTransform;
 	EntityQuery chunkQuery;
 
 	protected override void OnCreate() {
@@ -13,13 +12,10 @@ public class PlayerChunkSystem : SystemBase {
 		RequireSingletonForUpdate<ChunkLoaderQueueElement>();
 	}
 
-	protected override void OnStartRunning() {
-		player = GetSingletonEntity<PlayerComponent>();
-		playerTransform = EntityManager.GetSharedComponentData<PlayerTransform>(player);
-	}
+	protected override void OnStartRunning() => player = GetSingletonEntity<PlayerComponent>();
 
 	protected override void OnUpdate() {
-		float3 pos = playerTransform.value.position;
+		float3 pos = GetComponent<Translation>(player).Value;
 
 		var chunks = new NativeArray<int2>(chunkQuery.CalculateEntityCount(), Allocator.TempJob);
 
@@ -32,9 +28,8 @@ public class PlayerChunkSystem : SystemBase {
 
 		const int radius = 4;
 		var loadingBacklog = new NativeArray<int2>(4 * radius * radius, Allocator.TempJob);
-		var loadingBacklogLength = new NativeArray<int>(1, Allocator.TempJob);
-		loadingBacklogLength[0] = 0;
-		
+		var loadingBacklogLength = new NativeArray<int>(1, Allocator.TempJob) {[0] = 0};
+
 		Entities.ForEach((Entity e, int entityInQueryIndex, ref PlayerComponent playerComponent) => {
 				int chunkX = (int) math.floor(pos.x / WorldData.CHUNK_SIZE);
 				int chunkY = (int) math.floor(pos.z / WorldData.CHUNK_SIZE);

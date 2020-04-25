@@ -2,7 +2,8 @@
 using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour {
-	Player player;
+	public Player player;
+	public Transform playerTransform;
 	PlayerData data;
 	Animator animator;
 	float yRot;
@@ -10,7 +11,7 @@ public class CameraController : MonoBehaviour {
 	static readonly int Sprinting = Animator.StringToHash("sprinting");
 
 	void Awake() {
-		player = GetComponentInParent<Player>();
+		transform.SetParent(playerTransform);
 		data = player.data;
 		animator = GetComponent<Animator>();
 	}

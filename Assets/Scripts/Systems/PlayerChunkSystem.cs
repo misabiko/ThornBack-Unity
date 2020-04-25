@@ -8,11 +8,11 @@ public class PlayerChunkSystem : SystemBase {
 	EntityQuery chunkQuery;
 
 	protected override void OnCreate() {
-		RequireSingletonForUpdate<PlayerComponent>();
+		RequireSingletonForUpdate<PlayerChunkCoord>();
 		RequireSingletonForUpdate<ChunkLoaderQueueElement>();
 	}
 
-	protected override void OnStartRunning() => player = GetSingletonEntity<PlayerComponent>();
+	protected override void OnStartRunning() => player = GetSingletonEntity<PlayerChunkCoord>();
 
 	protected override void OnUpdate() {
 		float3 pos = GetComponent<Translation>(player).Value;
@@ -30,7 +30,7 @@ public class PlayerChunkSystem : SystemBase {
 		var loadingBacklog = new NativeArray<int2>(4 * radius * radius, Allocator.TempJob);
 		var loadingBacklogLength = new NativeArray<int>(1, Allocator.TempJob) {[0] = 0};
 
-		Entities.ForEach((Entity e, int entityInQueryIndex, ref PlayerComponent playerComponent) => {
+		Entities.ForEach((Entity e, int entityInQueryIndex, ref PlayerChunkCoord playerComponent) => {
 				int chunkX = (int) math.floor(pos.x / WorldData.CHUNK_SIZE);
 				int chunkY = (int) math.floor(pos.z / WorldData.CHUNK_SIZE);
 

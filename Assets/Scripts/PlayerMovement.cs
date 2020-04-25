@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour {
 
 	void Start() {
 		var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-		var entityQuery = entityManager.CreateEntityQuery(typeof(PlayerComponent));
+		var entityQuery = entityManager.CreateEntityQuery(typeof(PlayerChunkCoord));
 		var entities = entityQuery.ToEntityArray(Allocator.TempJob);
 		
 		/*var physicsMass = entityManager.GetComponentData<PhysicsMass>(entities[0]);

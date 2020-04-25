@@ -2,7 +2,7 @@
 using Unity.Entities;
 using UnityEngine;
 
-public struct PlayerComponent : IComponentData {
+public struct PlayerChunkCoord : IComponentData {
 	public int chunkX;
 	public int chunkY;
 }

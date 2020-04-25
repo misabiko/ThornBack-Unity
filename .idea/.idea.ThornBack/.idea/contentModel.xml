@@ -25,11 +25,11 @@
           <e p="Data" t="Include">
             <e p="BlockLibrary.cs" t="Include" />
             <e p="ChunkData.cs" t="Include" />
-            <e p="PlayerComponent.cs" t="Include" />
-            <e p="PlayerTag.cs" t="Include" />
+            <e p="PlayerChunkCoord.cs" t="Include" />
             <e p="WorldData.cs" t="Include" />
           </e>
           <e p="Player.cs" t="Include" />
+          <e p="PlayerAuthoring.cs" t="Include" />
           <e p="PlayerData.cs" t="Include" />
           <e p="PlayerMovement.cs" t="Include" />
           <e p="StayAABB.cs" t="Include" />

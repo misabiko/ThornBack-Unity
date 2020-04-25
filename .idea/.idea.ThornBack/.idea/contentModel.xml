@@ -25,7 +25,8 @@
           <e p="Data" t="Include">
             <e p="BlockLibrary.cs" t="Include" />
             <e p="ChunkData.cs" t="Include" />
-            <e p="PlayerChunkCoord.cs" t="Include" />
+            <e p="PlayerComponents.cs" t="Include" />
+            <e p="PlayerMovementData.cs" t="Include" />
             <e p="WorldData.cs" t="Include" />
           </e>
           <e p="Player.cs" t="Include" />
@@ -38,6 +39,7 @@
             <e p="ChunkMeshingSystem.cs" t="Include" />
             <e p="ChunkMeshUpdaterSystem.cs" t="Include" />
             <e p="PlayerChunkSystem.cs" t="Include" />
+            <e p="PlayerInputSystem.cs" t="Include" />
             <e p="PlayerMovementSystem.cs" t="Include" />
             <e p="WorldGenSystem.cs" t="Include" />
           </e>

@@ -1,6 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Transforms;
 
 [UpdateAfter(typeof(PlayerInputSystem))]
 public class PlayerMovementSystem : SystemBase {
@@ -17,6 +18,7 @@ public class PlayerMovementSystem : SystemBase {
 		float deccel = playerData.deccel;
 		float accel = playerData.accel;
 		float speed = playerData.speed;
+		float jumpForce = playerData.jumpForce;
 		
 		Entities
 			.WithAll<PlayerChunkCoord>()
@@ -34,8 +36,17 @@ public class PlayerMovementSystem : SystemBase {
 						velocity.Linear += moveData.moveDirection * accel;
 						ClampVelocityXZ(ref velocity, speed);
 					}
+
+					if (moveData.jumpInput)
+						velocity.Linear.y = jumpForce;
 				}
 			).ScheduleParallel();
+
+		Entities
+			.ForEach((ref Rotation rotation, in PlayerMoveData moveData) => {
+				var q = quaternion.AxisAngle(new float3(0, 1, 0), moveData.yAngle);
+				rotation.Value = math.mul(q, rotation.Value);
+			}).ScheduleParallel();
 	}
 
 	static void ClampVelocityXZ(ref PhysicsVelocity velocity, float maxSpeed) {

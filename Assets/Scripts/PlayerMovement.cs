@@ -85,7 +85,7 @@ public class PlayerMovement : MonoBehaviour {
 	public void OnJump(InputAction.CallbackContext ctx) {
 		if (!ctx.ReadValueAsButton() || !IsGrounded()) return;
 		
-		//rigidbody.AddForce(data.jumpForce * Vector3.up, ForceMode.Impulse);
+		rigidbody.AddForce(data.jumpForce * Vector3.up, ForceMode.Impulse);
 	}
 
 	bool IsGrounded() => true;

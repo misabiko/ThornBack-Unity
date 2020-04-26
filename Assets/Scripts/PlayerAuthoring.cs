@@ -9,7 +9,6 @@ public class PlayerAuthoring : MonoBehaviour, IConvertGameObjectToEntity {
 	public InputActionAsset inputAsset;
 
 	public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem) {
-		dstManager.SetName(entity, "Player");
 		dstManager.AddComponent<PlayerMoveData>(entity);
 		
 		dstManager.AddComponent<PlayerChunkCoord>(entity);
@@ -17,6 +16,7 @@ public class PlayerAuthoring : MonoBehaviour, IConvertGameObjectToEntity {
 		playerQuery.SetSingleton(new PlayerChunkCoord {chunkX = 0, chunkY = 0});
 
 		dstManager.World.GetExistingSystem<PlayerInputSystem>().actionMap = inputAsset.FindActionMap("Player"); 
+		dstManager.World.GetExistingSystem<PlayerInputSystem>().playerData = playerData;
 		dstManager.World.GetExistingSystem<PlayerMovementSystem>().playerData = playerData;
 	}
 }

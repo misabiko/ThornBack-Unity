@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Player Data
   m_EditorClassIdentifier: 
   speed: 3
-  sprintSpeed: 4
+  sprintSpeed: 8
   accel: 100
-  jumpForce: 8
+  jumpForce: 10
   deccel: 0.5
   camSensitivityX: 0.005
   camSensitivityY: 0.005

@@ -19,7 +19,10 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
-          <e p="CameraAuthoring.cs" t="Include" />
+          <e p="Authoring" t="Include">
+            <e p="CameraAuthoring.cs" t="Include" />
+            <e p="PlayerAuthoring.cs" t="Include" />
+          </e>
           <e p="CameraController.cs" t="Include" />
           <e p="Chunk.cs" t="Include" />
           <e p="ChunkLoader.cs" t="Include" />
@@ -32,15 +35,14 @@
             <e p="WorldData.cs" t="Include" />
           </e>
           <e p="Player.cs" t="Include" />
-          <e p="PlayerAuthoring.cs" t="Include" />
           <e p="PlayerData.cs" t="Include" />
           <e p="PlayerMovement.cs" t="Include" />
-          <e p="StayAABB.cs" t="Include" />
           <e p="Systems" t="Include">
             <e p="CameraMovementSystem.cs" t="Include" />
             <e p="ChunkFactorySystem.cs" t="Include" />
             <e p="ChunkMeshingSystem.cs" t="Include" />
             <e p="ChunkMeshUpdaterSystem.cs" t="Include" />
+            <e p="CursorSystem.cs" t="Include" />
             <e p="PlayerChunkSystem.cs" t="Include" />
             <e p="PlayerInputSystem.cs" t="Include" />
             <e p="PlayerMovementSystem.cs" t="Include" />

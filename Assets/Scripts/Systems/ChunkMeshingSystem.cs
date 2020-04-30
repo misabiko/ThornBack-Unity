@@ -138,7 +138,7 @@ public class ChunkMeshingSystem : SystemBase {
 							Center = float3.zero,
 							Orientation = quaternion.identity,
 							Size = meshingData[i].size,
-							BevelRadius = 0.5f
+							BevelRadius = 0f
 						})
 					});
 

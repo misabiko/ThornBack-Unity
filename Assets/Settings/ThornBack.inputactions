@@ -22,7 +22,7 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Fire",
+                    "name": "Hit",
                     "type": "Button",
                     "id": "c5fcf551-d81d-4bb9-a44d-4136549e822d",
                     "expectedControlType": "Button",
@@ -33,7 +33,7 @@
                     "name": "Sprint",
                     "type": "Button",
                     "id": "ea0df93e-8ded-4bd8-a69d-ca0261fa4e39",
-                    "expectedControlType": "",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
                 },
@@ -58,6 +58,14 @@
                     "type": "Button",
                     "id": "1e7ee3b3-0d4d-4406-9b07-3b39e045f753",
                     "expectedControlType": "",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "56441b59-fce2-47e6-9373-20035561adbc",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
                 }
@@ -235,7 +243,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Fire",
+                    "action": "Hit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -246,7 +254,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Fire",
+                    "action": "Hit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -257,7 +265,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch",
-                    "action": "Fire",
+                    "action": "Hit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -268,7 +276,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
-                    "action": "Fire",
+                    "action": "Hit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -279,7 +287,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "XR",
-                    "action": "Fire",
+                    "action": "Hit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -324,6 +332,28 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c6a3d834-abbf-4150-b11b-694d9467a412",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9032415e-0fae-4daa-a84c-31d75e075352",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

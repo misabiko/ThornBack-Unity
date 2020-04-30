@@ -2,11 +2,12 @@
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
+using UnityEngine;
 
 [UpdateAfter(typeof(PlayerInputSystem))]
 public class PlayerMovementSystem : SystemBase {
 	public PlayerData playerData;
-	
+
 	protected override void OnUpdate() {
 		//TODO Make that a one off
 		Entities
@@ -18,10 +19,10 @@ public class PlayerMovementSystem : SystemBase {
 		float deccel = playerData.deccel;
 		float accel = playerData.accel;
 		float speed = playerData.speed;
+		float sprintSpeed = playerData.sprintSpeed;
 		float jumpForce = playerData.jumpForce;
-		
+
 		Entities
-			.WithAll<PlayerChunkCoord>()
 			.ForEach(
 				(ref PhysicsVelocity velocity, in PlayerMoveData moveData) => {
 					if (moveData.moveDirection.Equals(float3.zero)) {
@@ -32,9 +33,10 @@ public class PlayerMovementSystem : SystemBase {
 							velocity.Linear -= math.normalize(flatVel) * deccel;
 						else
 							ClampVelocityXZ(ref velocity, 0);
-					}else {
+					}
+					else {
 						velocity.Linear += moveData.moveDirection * accel;
-						ClampVelocityXZ(ref velocity, speed);
+						ClampVelocityXZ(ref velocity, moveData.sprinting ? sprintSpeed : speed);
 					}
 
 					if (moveData.jumpInput)
@@ -42,11 +44,12 @@ public class PlayerMovementSystem : SystemBase {
 				}
 			).ScheduleParallel();
 
-		Entities
-			.ForEach((ref Rotation rotation, in PlayerMoveData moveData) => {
-				var q = quaternion.AxisAngle(new float3(0, 1, 0), moveData.yAngle);
-				rotation.Value = math.mul(q, rotation.Value);
-			}).ScheduleParallel();
+		if (!Cursor.visible)
+			Entities
+				.ForEach((ref Rotation rotation, in PlayerMoveData moveData) => {
+					var q = quaternion.AxisAngle(new float3(0, 1, 0), moveData.yAngle);
+					rotation.Value = math.mul(q, rotation.Value);
+				}).ScheduleParallel();
 	}
 
 	static void ClampVelocityXZ(ref PhysicsVelocity velocity, float maxSpeed) {
